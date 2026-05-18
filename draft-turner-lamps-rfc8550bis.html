@@ -1,0 +1,2554 @@
+<!DOCTYPE html>
+<html lang="en" class="Internet-Draft">
+<head>
+<meta charset="utf-8">
+<meta content="Common,Latin" name="scripts">
+<meta content="initial-scale=1.0" name="viewport">
+<title>Secure/Multipurpose Internet Mail Extensions (S/MIME) Version 4.0 Certificate Handling</title>
+<meta content="Blake Ramsdell" name="author">
+<meta content="Sean Turner" name="author">
+<meta content='
+       This document specifies conventions for X.509 certificate usage by
+Secure/Multipurpose Internet Mail Extensions (S/MIME) v4.0 agents.
+S/MIME provides a method to send and receive secure MIME messages,
+and certificates are an integral part of S/MIME agent processing.
+S/MIME agents validate certificates as described in RFC 5280
+("Internet X.509 Public Key Infrastructure Certificate and
+Certificate Revocation List (CRL) Profile").  S/MIME agents must meet
+the certificate-processing requirements in this document as well as
+those in RFC 5280.  This document obsoletes RFC 5750. 
+    ' name="description">
+<meta content="xml2rfc 3.33.0" name="generator">
+<meta content="draft-turner-lamps-rfc8550bis-latest" name="ietf.draft">
+<!-- Generator version information:
+  xml2rfc 3.33.0
+    Python 3.12.13
+    ConfigArgParse 1.7
+    google-i18n-address 3.1.1
+    intervaltree 3.2.1
+    Jinja2 3.1.6
+    lxml 6.0.2
+    platformdirs 4.9.6
+    pycountry 24.6.1
+    PyYAML 6.0.3
+    requests 2.33.1
+    wcwidth 0.7.0
+-->
+<link href="draft-turner-lamps-rfc8550bis.xml" rel="alternate" type="application/rfc+xml">
+<link href="#copyright" rel="license">
+<style type="text/css">@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-cyrillic.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-cyrillic.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: local('Lora SemiBold'), local('Lora-SemiBold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-semibold-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Oxygen Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Oxygen Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+}
+
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-cyrillic.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-greek.woff2') format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-cyrillic.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-greek.woff2') format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+:root {
+  color-scheme: light dark;
+  --background-color: #fff;
+  --text-color: #222;
+  --title-color: #191919;
+  --link-color: #2a6496;
+  --highlight-color: #f9f9f9;
+  --line-color: #eee;
+  --pilcrow-weak: #ddd;
+  --pilcrow-strong: #bbb;
+  --small-font-size: 14.5px;
+  --font-mono: 'Oxygen Mono', monospace;
+  --font-title: "Sofia Sans Semi Condensed", sans-serif;
+  scrollbar-color: #bbb #eee;
+}
+body {
+  max-width: 600px;
+  margin: 75px auto;
+  padding: 0 5px;
+  color: var(--text-color);
+  background-color: var(--background-color);
+  font: 16px/22px "Lora", serif;
+  scroll-behavior: smooth;
+}
+
+.ears {
+  display: none;
+}
+
+/* headings */
+section {
+  clear: both;
+}
+.section-number {
+  padding-right: 0.5em;
+}
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-title);
+  font-weight: 680;
+  margin: 0.8em 0 0.3em;
+  font-size-adjust: 0.5;
+  color: var(--title-color);
+}
+h1#title {
+  font-size: 32px;
+  line-height: 40px;
+  clear: both;
+}
+h1#title, h1#rfcnum {
+  margin: 1.5em 0 0.2em;
+}
+h1#rfcnum + h1#title {
+  margin: 0.2em 0;
+}
+
+h1, h2, h3 {
+  font-size: 22px;
+  line-height: 27px;
+}
+h4, h5, h6 {
+  font-size: 20px;
+  line-height: 24px;
+}
+
+/* general structure */
+.author {
+  padding-bottom: 0.3em;
+  vertical-align: top;
+}
+#abstract+p {
+  font-size: 18px;
+  line-height: 24px;
+}
+#abstract+p code, #abstract+p samp, #abstract+p tt {
+  font-size: 16px;
+  line-height: 0;
+}
+
+p {
+  padding: 0;
+  margin: 0.5em 0;
+  text-align: left;
+}
+div {
+  margin: 0;
+}
+.alignRight.art-text {
+  background-color: var(--highlight-color);
+  border: 1px solid var(--line-color);
+  border-radius: 3px;
+  padding: 0.5em 1em 0;
+  margin-bottom: 0.5em;
+}
+.alignRight.art-text pre {
+  padding: 0;
+  width: auto;
+}
+.alignRight {
+  margin: 1em 0;
+}
+.alignRight > *:first-child {
+  border: none;
+  margin: 0;
+  float: right;
+  clear: both;
+}
+.alignRight > *:nth-child(2) {
+  clear: both;
+  display: block;
+  border: none;
+}
+svg {
+  display: block;
+}
+/* font-family isn't space-separated, but =~ will have to do */
+svg[font-family~="monospace" i], svg [font-family~="monospace" i] {
+  font-family: var(--font-mono);
+}
+.alignCenter.art-text {
+  background-color: var(--highlight-color);
+  border: 1px solid var(--line-color);
+  border-radius: 3px;
+  padding: 0.5em 1em 0;
+  margin-bottom: 0.5em;
+}
+.alignCenter.art-text pre {
+  padding: 0;
+  width: auto;
+}
+.alignCenter {
+  margin: 1em 0;
+}
+.alignCenter > *:first-child {
+  border: none;
+  /* this isn't optimal, but it's an existence proof.  PrinceXML doesn't
+     support flexbox yet.
+  */
+  display: table;
+  margin: 0 auto;
+}
+
+/* lists */
+ol, ul {
+  padding: 0;
+  margin: 0 0 0.5em 2em;
+  & :is(ol, ul) {
+    margin-left: 1em;
+  }
+}
+li {
+  margin: 0 0 0.25em 0;
+}
+ul.empty, .ulEmpty {
+  list-style-type: none;
+  & li {
+    margin-top: 0.5em;
+  }
+}
+:is(ul, ol).compact, .ulCompact, .olCompact {
+  margin: 0 0 0 2em;
+  & li {
+    margin: 0;
+    & :first-child { margin-top: 0; }
+    & :last-child { margin-bottom: 0; }
+  }
+}
+
+/* definition lists */
+dl {
+  clear: left;
+  --indent: 3ch;
+  /* --indent: attr(indent ch); not supported in any browser, but we can dream */
+  &.olPercent {
+    --indent: 5ch;
+    & > dt {
+      min-width: calc(var(--indent) - 2ch);
+    }
+  }
+  &.olPercent > dt {
+    float: none;
+  }
+
+  dl > dd > & {
+    margin-top: 0.5em;
+    margin-bottom: 0;
+  }
+}
+dl:not(.dlNewline) > dt {
+  float: left;
+  margin-right: 2ch;
+  min-width: 8ch;
+}
+dl > dd {
+  margin-bottom: .8em;
+  margin-left: var(--indent) !important; /* stupid element overrides */
+  min-height: 2ex;
+}
+:is(dl.compact, .dlCompact) > dd {
+  margin-bottom: 0;
+  & > :is(:first-child, .break:first-child + *) {
+    margin-top: 0;
+  }
+  & > :is(:last-child) {
+    margin-bottom: 0;
+  }
+}
+:is(dd, span).break {
+  display: none;
+}
+
+/* links */
+a, a[href].selfRef:hover {
+  text-decoration: none;
+}
+a[href] {
+  color: var(--link-color);
+}
+a[href].selfRef, .iref + a[href].internal {
+  color: var(--text-color);
+}
+a[href]:hover {
+  text-decoration: underline;
+}
+a[href].selfRef:hover {
+  background-color: var(--highlight-color);
+}
+a.xref:is(.cite, .auto), :is(#status-of-memo, #copyright) a {
+  white-space: nowrap;
+}
+
+/* Figures */
+tt, code, pre {
+  background-color: var(--highlight-color);
+  font: 14px/22px var(--font-mono);
+}
+tt, code {
+  /* changing the font for inline elements leads to different ascender
+     and descender heights; as we want to retain baseline alignment,
+     remove leading to avoid altering the final height of lines
+     note: this fails if these blocks take an entire line,
+     a different solution would be great */
+  line-height: 0;
+}
+:is(h1, h2, h3, h4, h5, h6) :is(tt, code) {
+  font-size: 84%;
+}
+pre {
+  border: 1px solid var(--line-color);
+  font-size: 13.5px;
+  line-height: 16px;
+  letter-spacing: -0.2px;
+  margin: 5px;
+  padding: 5px;
+}
+img {
+  max-width: 100%;
+}
+figure {
+  margin: 0.5em 0;
+  padding: 0;
+}
+figure blockquote {
+  margin: 0.8em 0.4em 0.4em;
+}
+figcaption, caption {
+  font-style: italic;
+  margin: 0.5em 1.5em;
+  text-align: left;
+  caption-side: bottom;
+}
+@media screen {
+  /* Auto-collapse boilerplate. */
+  :is(#status-of-memo, #copyright) p {
+    margin: -2px 0;
+    max-height: 0;
+    transition: max-height 2s ease, margin 0.5s ease 0.5s;
+    overflow: hidden;
+  }
+  :is(#status-of-memo, #copyright):hover p,
+  :is(#status-of-memo, #copyright) h2:target ~ p {
+    margin: 0.5em 0;
+    max-height: 500px;
+    overflow: auto;
+  }
+  pre, svg {
+    display: inline-block;
+    /* In the horizontal direction, sometimes people make over-sized figures.
+       Scrollbars for those is therefore necessary: auto adds them as necessary..
+       In the vertical direction, the line-height can combine with the font
+       asender/descender height to produce scrollbars: hidden avoids that. */
+    overflow: auto hidden;
+  }
+  pre {
+    max-width: 100%;
+    width: calc(100% - 22px - 1em);
+  }
+  svg {
+    max-width: calc(100% - 22px - 1em);
+  }
+  figure pre {
+    display: block;
+    width: calc(100% - 25px);
+  }
+  :is(pre, svg) + .pilcrow {
+    display: inline-block;
+    vertical-align: text-bottom;
+    padding-bottom: 8px;
+  }
+}
+
+/* aside, blockquote */
+aside, blockquote {
+  margin-left: 0;
+  padding: 0 2em;
+  font-style: italic;
+}
+blockquote {
+  margin: 1em 0;
+  border-left: 2px var(--pilcrow-strong) solid;
+}
+cite {
+  display: block;
+  text-align: right;
+  font-style: italic;
+}
+
+/* tables */
+table {
+  width: auto;
+  max-width: 100%;
+  margin: 0 0 1em;
+  border-collapse: collapse;
+}
+table.right {
+  margin-left: auto;
+}
+table.center {
+  margin-left: auto;
+  margin-right: auto;
+}
+table.left {
+  margin-right: auto;
+}
+table .text-left {
+  text-align: left;
+}
+table .text-center {
+  text-align: center;
+}
+table .text-right {
+  text-align: right;
+}
+
+thead, tbody {
+  border: 1px solid var(--line-color);
+}
+th, td {
+  text-align: left;
+  vertical-align: top;
+  padding: 5px 10px;
+}
+th {
+  background-color: var(--line-color);
+}
+:is(tr:nth-child(2n), thead+tbody > tr:nth-child(2n+1)) > td {
+  background-color: var(--background-color);
+}
+:is(tr:nth-child(2n+1), thead+tbody > tr:nth-child(2n)) > td {
+  background-color: var(--highlight-color);
+}
+table caption {
+  margin: 0;
+  padding: 3px 0 3px 1em;
+}
+table p {
+  margin: 0;
+}
+
+/* pilcrow */
+a.pilcrow {
+  margin-left: 3px;
+  opacity: 0.2;
+  user-select: none;
+  &[href] {
+    color: var(--pilcrow-weak);
+    &:hover { text-decoration: none; }
+  }
+}
+@media not print {
+  :hover > a.pilcrow, a.pilcrow:focus {
+    opacity: 1;
+  }
+  a.pilcrow[href]:hover {
+    color: var(--pilcrow-strong);
+    background-color: transparent;
+  }
+}
+@media print {
+  a.pilcrow {
+    display: none;
+  }
+}
+
+/* misc */
+hr {
+  border: 0;
+  border-top: 1px solid var(--line-color);
+}
+.bcp14 {
+  font-variant: small-caps;
+  font-weight: 600;
+  font-size: var(--small-font-size);
+}
+.role {
+  font-variant: all-small-caps;
+}
+sub, sup {
+  line-height: 1;
+  font-size: 80%;
+}
+
+/* info block */
+#identifiers {
+  margin: 0;
+  font-size: var(--small-font-size);
+  line-height: 18px;
+  --identifier-width: 15ch;
+  & dt {
+    width: var(--identifier-width);
+    min-width: var(--identifier-width);
+    clear: left;
+    float: left;
+    text-align: right;
+    margin-right: 1ch;
+  }
+  & dd {
+    margin: 0;
+    margin-left: calc(1em + var(--identifier-width)) !important;
+    min-width: 5em;
+  }
+  & .authors {
+    & .author {
+      display: inline-block;
+      margin-right: 1.5em;
+    }
+    & .org {
+      font-style: italic;
+    }
+  }
+}
+
+/* The prepared/rendered info at the very bottom of the page */
+.docInfo {
+  color: #999;
+  font-size: 0.9em;
+  font-style: italic;
+  margin-top: 2em;
+}
+.docInfo .prepared {
+  float: right;
+}
+
+/* table of contents */
+#toc {
+  padding: 0.75em 0 2em 0;
+  margin-bottom: 1em;
+
+  & nav {
+    & ul {
+      margin: 0 0.5em 0 0;
+      padding: 0;
+      list-style: none;
+    }
+    & li {
+      line-height: 1.3em;
+      margin: 2px 0;
+      padding-left: 1.2em;
+      text-indent: -1.2em;
+    }
+  }
+  & a.xref {
+    white-space: normal;
+  }
+}
+
+.references {
+  & > dt {
+    text-align: right;
+    font-weight: bold;
+    min-width: 10ch;
+    margin-right: 1.5ch;
+    &:target::before {
+      content: "⇒";
+      margin: 0 10px 0 -25px;
+    }
+  }
+  & > dd {
+    margin-left: 12ch !important;
+    overflow: visible;
+    & .refInstance {
+      margin-bottom: 0.8em;
+    }
+    & .ascii {
+      margin-bottom: 0.25em;
+    }
+  }
+}
+
+#rfc\.index\.index + ul {
+  margin-left: 0;
+}
+
+/* authors */
+address.vcard {
+  font-style: normal;
+  max-width: 20em;
+  margin: 1em auto 1em 0;
+
+  & .nameRole {
+    font-weight: 700;
+    margin-left: 0;
+  }
+  & .label {
+    margin: 0.5em 0;
+  }
+  & .type {
+    display: none;
+  }
+  & .alternative-contact {
+    margin: 0.5em 0 0.25em 0;
+  }
+  & .non-ascii {
+    margin: 0 0 0 2em;
+  }
+  & div.left {
+    text-align: left;
+  }
+  & div.right {
+    text-align: right;
+  }
+}
+
+hr.addr {
+  border-top: 1px dashed;
+  margin: 0;
+  color: #ddd;
+  max-width: calc(100% - 16px);
+}
+@media (min-width: 500px) {
+  #authors-addresses > section {
+    column-count: 2;
+    column-gap: 20px;
+  }
+  #authors-addresses > section > h2 {
+    column-span: all;
+  }
+  /* hack for break-inside: avoid-column */
+  #authors-addresses address {
+    display: inline-block;
+    break-inside: avoid-column;
+  }
+}
+
+/* Comments */
+.rfcEditorRemove p:first-of-type {
+  font-style: italic;
+}
+.cref {
+  background-color: rgba(249, 232, 105, 0.3);
+  padding: 2px 4px;
+}
+.crefSource {
+  font-style: italic;
+}
+
+@media screen {
+  #toc nav {
+    font-family: var(--font-title);
+    font-weight: 360;
+    & > ul { margin-bottom: 2em; }
+    & ul {
+      margin: 0 0 0 4px;
+      & :is(p, li) {
+        margin: 2px 0;
+      }
+    }
+  }
+  #toc a.toplink {
+    float: right;
+  }
+}
+@media not screen {
+  #toc a.toplink {
+    display: none;
+  }
+}
+
+
+/* TOC layout for smaller screens */
+@media screen and (max-width: 929px) {
+  #toc {
+    position: fixed;
+    z-index: 2;
+    top: 0;
+    right: 0;
+    padding: 1px 0 0 0;
+    margin: 0;
+    border-bottom: 1px solid #ccc;
+    opacity: 0.6;
+  }
+  #toc h2 {
+    margin: 0;
+    padding: 2px 0 2px 6px;
+    padding-right: 1em;
+    font-size: 18px;
+    line-height: 24px;
+    min-width: 190px;
+    text-align: right;
+    background-color: #444;
+    color: white;
+    cursor: pointer;
+    &::before { /* css hamburger */
+      float: right;
+      position: relative;
+      width: 1em;
+      height: 1px;
+      left: -164px;
+      margin: 8px 0 0 0;
+      background: white none repeat scroll 0 0;
+      box-shadow: 0 4px 0 0 white, 0 8px 0 0 white;
+      content: "";
+    }
+  }
+  #toc nav {
+    display: none;
+    background-color: var(--background-color);
+    padding: 0.5em 1em 1em;
+    overflow: auto;
+    overscroll-behavior: contain;
+    height: calc(100vh - 48px);
+    border-left: 1px solid #ddd;
+  }
+  #toc.active {
+    opacity: 1;
+    & nav { display: block; }
+  }
+  /* Make the collapsed ToC header render white on gray also when it's a link */
+  #toc h2 a,
+  #toc h2 a:is(:link, :focus, :hover),
+  #toc a.toplink,
+  #toc a.toplink:hover {
+    color: white;
+    background-color: #444;
+    text-decoration: none;
+  }
+  #toc a.toplink {
+    margin: 2px 0.5em 0;
+  }
+}
+
+/* TOC layout for wide screens */
+@media screen and (min-width: 930px) {
+  body {
+    padding-right: 360px;
+    padding-right: calc(min(180px + 20%, 500px));
+  }
+  #toc {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    right: calc(50vw - 480px);
+    width: 312px;
+    margin: 0;
+    padding: 0;
+    z-index: 1;
+  }
+  #toc h2 {
+    margin: 0;
+    padding: 0.25em 1em 1em 0;
+  }
+  #toc nav {
+    display: block;
+    height: calc(90vh - 84px);
+    bottom: 0;
+    padding: 0.5em 0 2em;
+    overflow: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
+  img { /* future proofing */
+    max-width: 100%;
+    height: auto;
+  }
+  #toc a.toplink {
+    margin: 8px 0.5em 0;
+  }
+}
+
+/* pagination */
+@media print {
+  body {
+    width: 100%;
+  }
+  p {
+    orphans: 3;
+    widows: 3;
+  }
+  #n-copyright-notice {
+    border-bottom: none;
+  }
+  #toc, #n-introduction {
+    page-break-before: always;
+  }
+  #toc {
+    border-top: none;
+    padding-top: 0;
+  }
+  figure, pre, .vcard {
+    page-break-inside: avoid;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+  }
+  :is(h2, h3, h4, h5, h6)+*, dd {
+    page-break-before: avoid;
+  }
+  pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 10pt;
+  }
+  table {
+    border: 1px solid #ddd;
+  }
+  td {
+    border-top: 1px solid #ddd;
+  }
+}
+
+@page :first {
+  padding-top: 0;
+  @top-left {
+    content: normal;
+    border: none;
+  }
+  @top-center {
+    content: normal;
+    border: none;
+  }
+  @top-right {
+    content: normal;
+    border: none;
+  }
+}
+
+@page {
+  size: A4;
+  margin-bottom: 45mm;
+  padding-top: 20px;
+}
+
+/* Dark mode. */
+@media (prefers-color-scheme: dark) {
+:root {
+  --background-color: #121212;
+  --text-color: #f0f0f0;
+  --title-color: #fff;
+  --link-color: #4da4f0;
+  --highlight-color: #282828;
+  --line-color: #444;
+  --pilcrow-weak: #444;
+  --pilcrow-strong: #666;
+  scrollbar-color: #777 #333;
+}
+}
+
+/* SVG Trick: a prefix match works because only black and white are allowed */
+svg :is([stroke="black"], [stroke^="#000"]) {
+  stroke: var(--text-color);
+}
+svg :is([stroke="white"], [stroke^="#fff"]) {
+  stroke: var(--background-color);
+}
+svg :is([fill="black"], [fill^="#000"], :not([fill])) {
+  fill: var(--text-color);
+}
+svg :is([fill="white"], [fill^="#fff"]) {
+  fill: var(--background-color);
+}
+</style>
+
+</head>
+<body class="xml2rfc">
+<table class="ears">
+<thead><tr>
+<td class="left">Internet-Draft</td>
+<td class="center">S/MIME 4.0 Certificate Handling</td>
+<td class="right">May 2026</td>
+</tr></thead>
+<tfoot><tr>
+<td class="left">Ramsdell &amp; Turner</td>
+<td class="center">Expires 19 November 2026</td>
+<td class="right">[Page]</td>
+</tr></tfoot>
+</table>
+<div id="external-metadata" class="document-information"></div>
+<div id="internal-metadata" class="document-information">
+<dl id="identifiers">
+<dt class="label-workgroup">Workgroup:</dt>
+<dd class="workgroup">LAMPS</dd>
+<dt class="label-internet-draft">Internet-Draft:</dt>
+<dd class="internet-draft">draft-turner-lamps-rfc8550bis-latest</dd>
+<dt class="label-published">Published:</dt>
+<dd class="published">
+<time datetime="2026-05-18" class="published">18 May 2026</time>
+    </dd>
+<dt class="label-intended-status">Intended Status:</dt>
+<dd class="intended-status">Standards Track</dd>
+<dt class="label-expires">Expires:</dt>
+<dd class="expires"><time datetime="2026-11-19">19 November 2026</time></dd>
+<dt class="label-authors">Authors:</dt>
+<dd class="authors">
+<div class="author">
+      <div class="author-name">B. Ramsdell</div>
+<div class="org">Brute Squad Labs</div>
+</div>
+<div class="author">
+      <div class="author-name">S. Turner</div>
+<div class="org">sn3rd</div>
+</div>
+</dd>
+</dl>
+</div>
+<h1 id="title">Secure/Multipurpose Internet Mail Extensions (S/MIME) Version 4.0 Certificate Handling</h1>
+<section id="section-abstract">
+      <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
+<p id="section-abstract-1">This document specifies conventions for X.509 certificate usage by
+Secure/Multipurpose Internet Mail Extensions (S/MIME) v4.0 agents.
+S/MIME provides a method to send and receive secure MIME messages,
+and certificates are an integral part of S/MIME agent processing.
+S/MIME agents validate certificates as described in RFC 5280
+("Internet X.509 Public Key Infrastructure Certificate and
+Certificate Revocation List (CRL) Profile").  S/MIME agents must meet
+the certificate-processing requirements in this document as well as
+those in RFC 5280.  This document obsoletes RFC 5750.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+</section>
+<section class="note rfcEditorRemove" id="section-note.1">
+      <h2 id="name-about-this-document">
+<a href="#name-about-this-document" class="section-name selfRef">About This Document</a>
+      </h2>
+<p id="section-note.1-1">This note is to be removed before publishing as an RFC.<a href="#section-note.1-1" class="pilcrow">¶</a></p>
+<p id="section-note.1-2">
+        The latest revision of this draft can be found at <span><a href="https://seanturner.github.io/smime/draft-turner-lamps-rfc8550bis.html">https://seanturner.github.io/smime/draft-turner-lamps-rfc8550bis.html</a></span>.
+        Status information for this document may be found at <span><a href="https://datatracker.ietf.org/doc/draft-turner-lamps-rfc8550bis/">https://datatracker.ietf.org/doc/draft-turner-lamps-rfc8550bis/</a></span>.<a href="#section-note.1-2" class="pilcrow">¶</a></p>
+<p id="section-note.1-3">
+        Discussion of this document takes place on the
+        LAMPS Working Group mailing list (<span><a href="mailto:spasm@ietf.org">mailto:spasm@ietf.org</a></span>),
+        which is archived at <span><a href="mailarchive.ietf.org/arch/browse/spasm/">mailarchive.ietf.org/arch/browse/spasm/</a></span>.
+        Subscribe at <span><a href="https://www.ietf.org/mailman/listinfo/spasm/">https://www.ietf.org/mailman/listinfo/spasm/</a></span>.<a href="#section-note.1-3" class="pilcrow">¶</a></p>
+<p id="section-note.1-4">Source for this draft and an issue tracker can be found at
+        <span><a href="https://github.com/seanturner/smime">https://github.com/seanturner/smime</a></span>.<a href="#section-note.1-4" class="pilcrow">¶</a></p>
+</section>
+<div id="status-of-memo">
+<section id="section-boilerplate.1">
+        <h2 id="name-status-of-this-memo">
+<a href="#name-status-of-this-memo" class="section-name selfRef">Status of This Memo</a>
+        </h2>
+<p id="section-boilerplate.1-1">
+        This Internet-Draft is submitted in full conformance with the
+        provisions of BCP 78 and BCP 79.<a href="#section-boilerplate.1-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-2">
+        Internet-Drafts are working documents of the Internet Engineering Task
+        Force (IETF). Note that other groups may also distribute working
+        documents as Internet-Drafts. The list of current Internet-Drafts is
+        at <span><a href="https://datatracker.ietf.org/drafts/current/">https://datatracker.ietf.org/drafts/current/</a></span>.<a href="#section-boilerplate.1-2" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-3">
+        Internet-Drafts are draft documents valid for a maximum of six months
+        and may be updated, replaced, or obsoleted by other documents at any
+        time. It is inappropriate to use Internet-Drafts as reference
+        material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-4">
+        This Internet-Draft will expire on 19 November 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="copyright">
+<section id="section-boilerplate.2">
+        <h2 id="name-copyright-notice">
+<a href="#name-copyright-notice" class="section-name selfRef">Copyright Notice</a>
+        </h2>
+<p id="section-boilerplate.2-1">
+            Copyright (c) 2026 IETF Trust and the persons identified as the
+            document authors. All rights reserved.<a href="#section-boilerplate.2-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.2-2">
+            This document is subject to BCP 78 and the IETF Trust's Legal
+            Provisions Relating to IETF Documents
+            (<span><a href="https://trustee.ietf.org/license-info">https://trustee.ietf.org/license-info</a></span>) in effect on the date of
+            publication of this document. Please review these documents
+            carefully, as they describe your rights and restrictions with
+            respect to this document. Code Components extracted from this
+            document must include Revised BSD License text as described in
+            Section 4.e of the Trust Legal Provisions and are provided without
+            warranty as described in the Revised BSD License.<a href="#section-boilerplate.2-2" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.2-3">
+            This document may contain material from IETF Documents or IETF
+            Contributions published or made publicly available before November
+            10, 2008. The person(s) controlling the copyright in some of this
+            material may not have granted the IETF Trust the right to allow
+            modifications of such material outside the IETF Standards Process.
+            Without obtaining an adequate license from the person(s)
+            controlling the copyright in such materials, this document may not
+            be modified outside the IETF Standards Process, and derivative
+            works of it may not be created outside the IETF Standards Process,
+            except to format it for publication as an RFC or to translate it
+            into languages other than English.<a href="#section-boilerplate.2-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="toc">
+<section id="section-toc.1">
+        <a href="#" onclick="scroll(0,0)" class="toplink">▲</a><h2 id="name-table-of-contents">
+<a href="#name-table-of-contents" class="section-name selfRef">Table of Contents</a>
+        </h2>
+<nav class="toc"><ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1">
+            <p id="section-toc.1-1.1.1"><a href="#section-1" class="auto internal xref">1</a>.  <a href="#name-introduction" class="internal xref">Introduction</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1.2.1">
+                <p id="section-toc.1-1.1.2.1.1" class="keepWithNext"><a href="#section-1.1" class="auto internal xref">1.1</a>.  <a href="#name-definitions" class="internal xref">Definitions</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1.2.2">
+                <p id="section-toc.1-1.1.2.2.1" class="keepWithNext"><a href="#section-1.2" class="auto internal xref">1.2</a>.  <a href="#name-conventions-used-in-this-do" class="internal xref">Conventions Used in This Document</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1.2.3">
+                <p id="section-toc.1-1.1.2.3.1" class="keepWithNext"><a href="#section-1.3" class="auto internal xref">1.3</a>.  <a href="#name-compatibility-with-prior-pr" class="internal xref">Compatibility with Prior Practice of S/MIME</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1.2.4">
+                <p id="section-toc.1-1.1.2.4.1"><a href="#section-1.4" class="auto internal xref">1.4</a>.  <a href="#name-changes-from-s-mime-v3-to-s" class="internal xref">Changes from S/MIME v3 to S/MIME v3.1</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1.2.5">
+                <p id="section-toc.1-1.1.2.5.1"><a href="#section-1.5" class="auto internal xref">1.5</a>.  <a href="#name-changes-from-s-mime-v31-to-" class="internal xref">Changes from S/MIME v3.1 to S/MIME v3.2</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1.2.6">
+                <p id="section-toc.1-1.1.2.6.1"><a href="#section-1.6" class="auto internal xref">1.6</a>.  <a href="#name-changes-since-s-mime-32" class="internal xref">Changes since S/MIME 3.2</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2">
+            <p id="section-toc.1-1.2.1"><a href="#section-2" class="auto internal xref">2</a>.  <a href="#name-cms-options" class="internal xref">CMS Options</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.1">
+                <p id="section-toc.1-1.2.2.1.1"><a href="#section-2.1" class="auto internal xref">2.1</a>.  <a href="#name-certificate-revocation-list" class="internal xref">Certificate Revocation Lists</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.2">
+                <p id="section-toc.1-1.2.2.2.1"><a href="#section-2.2" class="auto internal xref">2.2</a>.  <a href="#name-certificate-choices" class="internal xref">Certificate Choices</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.2.2.1">
+                    <p id="section-toc.1-1.2.2.2.2.1.1"><a href="#section-2.2.1" class="auto internal xref">2.2.1</a>.  <a href="#name-historical-note-about-cms-c" class="internal xref">Historical Note about CMS Certificates</a></p>
+</li>
+                </ul>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.3">
+                <p id="section-toc.1-1.2.2.3.1"><a href="#section-2.3" class="auto internal xref">2.3</a>.  <a href="#name-included-certificates" class="internal xref">Included Certificates</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3">
+            <p id="section-toc.1-1.3.1"><a href="#section-3" class="auto internal xref">3</a>.  <a href="#name-using-distinguished-names-f" class="internal xref">Using Distinguished Names for Internet Mail</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4">
+            <p id="section-toc.1-1.4.1"><a href="#section-4" class="auto internal xref">4</a>.  <a href="#name-certificate-processing" class="internal xref">Certificate Processing</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.1">
+                <p id="section-toc.1-1.4.2.1.1"><a href="#section-4.1" class="auto internal xref">4.1</a>.  <a href="#name-certificate-revocation-lists" class="internal xref">Certificate Revocation Lists</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.2">
+                <p id="section-toc.1-1.4.2.2.1"><a href="#section-4.2" class="auto internal xref">4.2</a>.  <a href="#name-certificate-path-validation" class="internal xref">Certificate Path Validation</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.3">
+                <p id="section-toc.1-1.4.2.3.1"><a href="#section-4.3" class="auto internal xref">4.3</a>.  <a href="#name-certificate-and-crl-signing" class="internal xref">Certificate and CRL Signing Algorithms, and Key Sizes</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.4">
+                <p id="section-toc.1-1.4.2.4.1"><a href="#section-4.4" class="auto internal xref">4.4</a>.  <a href="#name-pkix-certificate-extensions" class="internal xref">PKIX Certificate Extensions</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.4.2.1">
+                    <p id="section-toc.1-1.4.2.4.2.1.1"><a href="#section-4.4.1" class="auto internal xref">4.4.1</a>.  <a href="#name-basic-constraints" class="internal xref">Basic Constraints</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.4.2.2">
+                    <p id="section-toc.1-1.4.2.4.2.2.1"><a href="#section-4.4.2" class="auto internal xref">4.4.2</a>.  <a href="#name-key-usage-extension" class="internal xref">Key Usage Extension</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.4.2.3">
+                    <p id="section-toc.1-1.4.2.4.2.3.1"><a href="#section-4.4.3" class="auto internal xref">4.4.3</a>.  <a href="#name-subject-alternative-name" class="internal xref">Subject Alternative Name</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.4.2.4">
+                    <p id="section-toc.1-1.4.2.4.2.4.1"><a href="#section-4.4.4" class="auto internal xref">4.4.4</a>.  <a href="#name-extended-key-usage-extensio" class="internal xref">Extended Key Usage Extension</a></p>
+</li>
+                </ul>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5">
+            <p id="section-toc.1-1.5.1"><a href="#section-5" class="auto internal xref">5</a>.  <a href="#name-iana-considerations" class="internal xref">IANA Considerations</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6">
+            <p id="section-toc.1-1.6.1"><a href="#section-6" class="auto internal xref">6</a>.  <a href="#name-security-considerations" class="internal xref">Security Considerations</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7">
+            <p id="section-toc.1-1.7.1"><a href="#section-7" class="auto internal xref">7</a>.  <a href="#name-references" class="internal xref">References</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.1">
+                <p id="section-toc.1-1.7.2.1.1"><a href="#section-7.1" class="auto internal xref">7.1</a>.  <a href="#name-normative-references" class="internal xref">Normative References</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.2">
+                <p id="section-toc.1-1.7.2.2.1"><a href="#section-7.2" class="auto internal xref">7.2</a>.  <a href="#name-informative-references" class="internal xref">Informative References</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8">
+            <p id="section-toc.1-1.8.1"><a href="#appendix-A" class="auto internal xref">Appendix A</a>.  <a href="#name-historic-considerations" class="internal xref">Historic Considerations</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.1">
+                <p id="section-toc.1-1.8.2.1.1"><a href="#appendix-A.1" class="auto internal xref">A.1</a>.  <a href="#name-signature-algorithms-and-ke" class="internal xref">Signature Algorithms and Key Sizes</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9">
+            <p id="section-toc.1-1.9.1"><a href="#appendix-B" class="auto internal xref">Appendix B</a>.  <a href="#name-moving-s-mime-v2-certificat" class="internal xref">Moving S/MIME v2 Certificate Handling to Historic Status</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10">
+            <p id="section-toc.1-1.10.1"><a href="#appendix-C" class="auto internal xref"></a><a href="#name-acknowledgements" class="internal xref">Acknowledgements</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11">
+            <p id="section-toc.1-1.11.1"><a href="#appendix-D" class="auto internal xref"></a><a href="#name-contributors" class="internal xref">Contributors</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.12">
+            <p id="section-toc.1-1.12.1"><a href="#appendix-E" class="auto internal xref"></a><a href="#name-authors-addresses" class="internal xref">Authors' Addresses</a></p>
+</li>
+        </ul>
+</nav>
+</section>
+</div>
+<div id="introduction">
+<section id="section-1">
+      <h2 id="name-introduction">
+<a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction" class="section-name selfRef">Introduction</a>
+      </h2>
+<p id="section-1-1">S/MIME (Secure/Multipurpose Internet Mail Extensions) v4.0, described
+in <span>[<a href="#RFC8551" class="cite xref">RFC8551</a>]</span>, provides a method to send and receive secure MIME
+messages.  Before using a public key to provide security services,
+the S/MIME agent <span class="bcp14">MUST</span> verify that the public key is valid.  S/MIME
+agents <span class="bcp14">MUST</span> use PKIX certificates to validate public keys as
+described in <span>[<a href="#RFC5280" class="cite xref">RFC5280</a>]</span> ("Internet X.509 Public Key Infrastructure
+Certificate and Certificate Revocation List (CRL) Profile").  S/MIME
+agents <span class="bcp14">MUST</span> meet the certificate-processing requirements specified in
+this document in addition to those stated in <span>[<a href="#RFC5280" class="cite xref">RFC5280</a>]</span>.<a href="#section-1-1" class="pilcrow">¶</a></p>
+<p id="section-1-2">This specification is compatible with the Cryptographic Message
+Syntax (CMS) <span>[<a href="#RFC5652" class="cite xref">RFC5652</a>]</span> in that it uses the data types defined by CMS.
+It also inherits all the varieties of architectures for certificate-
+based key management supported by CMS.<a href="#section-1-2" class="pilcrow">¶</a></p>
+<p id="section-1-3">This document obsoletes <span>[<a href="#RFC5750" class="cite xref">RFC5750</a>]</span>.  The most significant changes
+revolve around changes in recommendations around the cryptographic
+algorithms used by the specification.  More details can be found in
+<a href="#latest-changes" class="auto internal xref">Section 1.6</a>.<a href="#section-1-3" class="pilcrow">¶</a></p>
+<p id="section-1-4">This specification contains a number of references to documents that
+have been obsoleted or replaced.  This is intentional, as the updated
+documents often do not have the same information or protocol
+requirements in them.<a href="#section-1-4" class="pilcrow">¶</a></p>
+<div id="definitions">
+<section id="section-1.1">
+        <h3 id="name-definitions">
+<a href="#section-1.1" class="section-number selfRef">1.1. </a><a href="#name-definitions" class="section-name selfRef">Definitions</a>
+        </h3>
+<p id="section-1.1-1">For the purposes of this document, the following definitions apply.<a href="#section-1.1-1" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-1.1-2">
+          <dt id="section-1.1-2.1">ASN.1:</dt>
+          <dd style="margin-left: 1.5em" id="section-1.1-2.2">
+            <p id="section-1.1-2.2.1">Abstract Syntax Notation One, as defined in ITU-T X.680 <span>[<a href="#X.680" class="cite xref">X.680</a>]</span>.<a href="#section-1.1-2.2.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-1.1-2.3">Attribute certificate (AC):</dt>
+          <dd style="margin-left: 1.5em" id="section-1.1-2.4">
+            <p id="section-1.1-2.4.1">An X.509 AC is a separate structure from a subject's public key
+X.509 certificate.  A subject may have multiple X.509 ACs
+associated with each of its public key X.509 certificates.  Each
+X.509 AC binds one or more attributes with one of the subject's
+public key X.509 certificates.  The X.509 AC syntax is defined in
+<span>[<a href="#RFC5755" class="cite xref">RFC5755</a>]</span>.<a href="#section-1.1-2.4.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-1.1-2.5">Certificate:</dt>
+          <dd style="margin-left: 1.5em" id="section-1.1-2.6">
+            <p id="section-1.1-2.6.1">A type that binds an entity's name to a public key with a digital
+signature.  This type is defined in <span>[<a href="#RFC5280" class="cite xref">RFC5280</a>]</span>.  This type also
+contains the distinguished name of the certificate issuer (the
+signer), an issuer-specific serial number, the issuer's signature
+algorithm identifier, a validity period, and extensions also
+defined in that document.<a href="#section-1.1-2.6.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-1.1-2.7">Certificate Revocation List (CRL):</dt>
+          <dd style="margin-left: 1.5em" id="section-1.1-2.8">
+            <p id="section-1.1-2.8.1">A type that contains information about certificates whose validity
+an issuer has revoked.  The information consists of an issuer
+name, the time of issue, the next scheduled time of issue, a list
+of certificate serial numbers and their associated revocation
+times, and extensions as defined in <span>[<a href="#RFC5280" class="cite xref">RFC5280</a>]</span>.  The CRL is signed
+by the issuer.  The type intended by this specification is the one
+defined in <span>[<a href="#RFC5280" class="cite xref">RFC5280</a>]</span>.<a href="#section-1.1-2.8.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-1.1-2.9">Receiving agent:</dt>
+          <dd style="margin-left: 1.5em" id="section-1.1-2.10">
+            <p id="section-1.1-2.10.1">Software that interprets and processes S/MIME CMS objects, MIME
+body parts that contain CMS objects, or both.<a href="#section-1.1-2.10.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-1.1-2.11">Sending agent:</dt>
+          <dd style="margin-left: 1.5em" id="section-1.1-2.12">
+            <p id="section-1.1-2.12.1">Software that creates S/MIME CMS objects, MIME body parts that
+contain CMS objects, or both.<a href="#section-1.1-2.12.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-1.1-2.13">S/MIME agent:</dt>
+          <dd style="margin-left: 1.5em" id="section-1.1-2.14">
+            <p id="section-1.1-2.14.1">User software that is a receiving agent, a sending agent, or both.<a href="#section-1.1-2.14.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+</dl>
+</section>
+</div>
+<div id="conventions-used-in-this-document">
+<section id="section-1.2">
+        <h3 id="name-conventions-used-in-this-do">
+<a href="#section-1.2" class="section-number selfRef">1.2. </a><a href="#name-conventions-used-in-this-do" class="section-name selfRef">Conventions Used in This Document</a>
+        </h3>
+<p id="section-1.2-1">The key words "<span class="bcp14">MUST</span>", "<span class="bcp14">MUST NOT</span>", "<span class="bcp14">REQUIRED</span>", "<span class="bcp14">SHALL</span>", "<span class="bcp14">SHALL NOT</span>", "<span class="bcp14">SHOULD</span>", "<span class="bcp14">SHOULD NOT</span>", "<span class="bcp14">RECOMMENDED</span>", "<span class="bcp14">NOT RECOMMENDED</span>",
+"<span class="bcp14">MAY</span>", and "<span class="bcp14">OPTIONAL</span>" in this document are to be interpreted as
+described in BCP 14 <span>[<a href="#RFC2119" class="cite xref">RFC2119</a>]</span> <span>[<a href="#RFC8174" class="cite xref">RFC8174</a>]</span> when, and only when, they
+appear in all capitals, as shown here.<a href="#section-1.2-1" class="pilcrow">¶</a></p>
+<p id="section-1.2-2">We define the additional requirement levels:<a href="#section-1.2-2" class="pilcrow">¶</a></p>
+<p id="section-1.2-3"><span class="bcp14">SHOULD</span>+<a href="#section-1.2-3" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-1.2-4.1">
+            <p id="section-1.2-4.1.1">This term means the same as <span class="bcp14">SHOULD</span>.  However, the authors
+  expect that a requirement marked as <span class="bcp14">SHOULD</span>+ will be
+  promoted at some future time to be a <span class="bcp14">MUST</span>.<a href="#section-1.2-4.1.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-1.2-5"><span class="bcp14">SHOULD</span>-<a href="#section-1.2-5" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-1.2-6.1">
+            <p id="section-1.2-6.1.1">This term means the same as <span class="bcp14">SHOULD</span>.  However, the authors
+  expect that a requirement marked as <span class="bcp14">SHOULD</span>- will be demoted
+  to a <span class="bcp14">MAY</span> in a future version of this document.<a href="#section-1.2-6.1.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-1.2-7"><span class="bcp14">MUST</span>-<a href="#section-1.2-7" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-1.2-8.1">
+            <p id="section-1.2-8.1.1">This term means the same as <span class="bcp14">MUST</span>.  However, the authors
+  expect that this requirement will no longer be a <span class="bcp14">MUST</span> in a
+  future document.  Although its status will be determined at
+  a later time, it is reasonable to expect that if a future
+  revision of a document alters the status of a <span class="bcp14">MUST</span>-
+  requirement, it will remain at least a <span class="bcp14">SHOULD</span> or a <span class="bcp14">SHOULD</span>-.<a href="#section-1.2-8.1.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-1.2-9">The term "RSA" in this document almost always refers to the
+PKCS #1 v1.5 RSA signature algorithm even when not qualified as such.
+There are a couple of places where it refers to the general RSA
+cryptographic operation; these can be determined from the context
+where it is used.<a href="#section-1.2-9" class="pilcrow">¶</a></p>
+<p id="section-1.2-10">The following reference conventions are used:<a href="#section-1.2-10" class="pilcrow">¶</a></p>
+<p id="section-1.2-11">[ESS] refers to <span>[<a href="#RFC2634" class="cite xref">RFC2634</a>]</span> and <span>[<a href="#RFC5035" class="cite xref">RFC5035</a>]</span>.<a href="#section-1.2-11" class="pilcrow">¶</a></p>
+<p id="section-1.2-12">[SMIMEv2] refers to <span>[<a href="#RFC2311" class="cite xref">RFC2311</a>]</span>, <span>[<a href="#RFC2312" class="cite xref">RFC2312</a>]</span>, <span>[<a href="#RFC2313" class="cite xref">RFC2313</a>]</span>, <span>[<a href="#RFC2314" class="cite xref">RFC2314</a>]</span>, and
+<span>[<a href="#RFC2315" class="cite xref">RFC2315</a>]</span>.<a href="#section-1.2-12" class="pilcrow">¶</a></p>
+<p id="section-1.2-13">[SMIMEv3] refers to <span>[<a href="#RFC2630" class="cite xref">RFC2630</a>]</span>, <span>[<a href="#RFC2631" class="cite xref">RFC2631</a>]</span>, <span>[<a href="#RFC2632" class="cite xref">RFC2632</a>]</span>, <span>[<a href="#RFC2633" class="cite xref">RFC2633</a>]</span>,
+<span>[<a href="#RFC2634" class="cite xref">RFC2634</a>]</span>, and <span>[<a href="#RFC5035" class="cite xref">RFC5035</a>]</span>.<a href="#section-1.2-13" class="pilcrow">¶</a></p>
+<p id="section-1.2-14">[SMIMEv3.1] refers to <span>[<a href="#RFC2634" class="cite xref">RFC2634</a>]</span>, <span>[<a href="#RFC3850" class="cite xref">RFC3850</a>]</span>, <span>[<a href="#RFC3851" class="cite xref">RFC3851</a>]</span>, <span>[<a href="#RFC3852" class="cite xref">RFC3852</a>]</span>,
+and <span>[<a href="#RFC5035" class="cite xref">RFC5035</a>]</span>.<a href="#section-1.2-14" class="pilcrow">¶</a></p>
+<p id="section-1.2-15">[SMIMEv3.2] refers to <span>[<a href="#RFC2634" class="cite xref">RFC2634</a>]</span>, <span>[<a href="#RFC5035" class="cite xref">RFC5035</a>]</span>, <span>[<a href="#RFC5652" class="cite xref">RFC5652</a>]</span>, <span>[<a href="#RFC5750" class="cite xref">RFC5750</a>]</span>,
+and <span>[<a href="#RFC5751" class="cite xref">RFC5751</a>]</span>.<a href="#section-1.2-15" class="pilcrow">¶</a></p>
+<p id="section-1.2-16">[SMIMEv4] refers to <span>[<a href="#RFC2634" class="cite xref">RFC2634</a>]</span>, <span>[<a href="#RFC5035" class="cite xref">RFC5035</a>]</span>, <span>[<a href="#RFC5652" class="cite xref">RFC5652</a>]</span>, <span>[<a href="#RFC8550" class="cite xref">RFC8550</a>]</span>, and
+<span>[<a href="#RFC8551" class="cite xref">RFC8551</a>]</span>.<a href="#section-1.2-16" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="compatibility-with-prior-practice-of-smime">
+<section id="section-1.3">
+        <h3 id="name-compatibility-with-prior-pr">
+<a href="#section-1.3" class="section-number selfRef">1.3. </a><a href="#name-compatibility-with-prior-pr" class="section-name selfRef">Compatibility with Prior Practice of S/MIME</a>
+        </h3>
+<p id="section-1.3-1">S/MIME version 4.0 agents ought to attempt to have the greatest
+interoperability possible with agents for prior versions of S/MIME.<a href="#section-1.3-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-1.3-2.1">
+            <p id="section-1.3-2.1.1">S/MIME version 2 is described in RFC 2311 through RFC 2315
+inclusive [SMIMEv2].<a href="#section-1.3-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.3-2.2">
+            <p id="section-1.3-2.2.1">S/MIME version 3 is described in RFC 2630 through RFC 2634
+inclusive and RFC 5035 [SMIMEv3].<a href="#section-1.3-2.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.3-2.3">
+            <p id="section-1.3-2.3.1">S/MIME version 3.1 is described in RFC 2634, RFC 3850, RFC 3851,
+RFC 3852, and RFC 5035 [SMIMEv3.1].<a href="#section-1.3-2.3.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.3-2.4">
+            <p id="section-1.3-2.4.1">S/MIME version 3.2 is described in RFC 2634, RFC 5035, RFC 5652,
+RFC 5750, and RFC 5751 [SMIMEv3.2].<a href="#section-1.3-2.4.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.3-2.5">
+            <p id="section-1.3-2.5.1">RFC 2311 also has historical information about the development of
+S/MIME.<a href="#section-1.3-2.5.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-1.3-3">Appendix A contains information about algorithms that were used for
+prior versions of S/MIME but are no longer considered to meet modern
+security standards.  Support of these algorithms may be needed to
+support historic S/MIME artifacts such as messages or files but
+<span class="bcp14">SHOULD NOT</span> be used for new artifacts.<a href="#section-1.3-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="changes-from-smime-v3-to-smime-v31">
+<section id="section-1.4">
+        <h3 id="name-changes-from-s-mime-v3-to-s">
+<a href="#section-1.4" class="section-number selfRef">1.4. </a><a href="#name-changes-from-s-mime-v3-to-s" class="section-name selfRef">Changes from S/MIME v3 to S/MIME v3.1</a>
+        </h3>
+<p id="section-1.4-1">This section reflects the changes that were made when S/MIME v3.1 was
+released.  The language of RFC 2119 ("<span class="bcp14">MUST</span>", "<span class="bcp14">SHOULD</span>", etc.) used for
+S/MIME v3 may have been superseded in later versions.<a href="#section-1.4-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-1.4-2.1">
+            <p id="section-1.4-2.1.1">Version 1 and version 2 CRLs <span class="bcp14">MUST</span> be supported.<a href="#section-1.4-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.4-2.2">
+            <p id="section-1.4-2.2.1">Multiple certification authority (CA) certificates with the same
+subject and public key, but with overlapping validity periods,
+<span class="bcp14">MUST</span> be supported.<a href="#section-1.4-2.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.4-2.3">
+            <p id="section-1.4-2.3.1">Version 2 ACs <span class="bcp14">SHOULD</span> be supported, and version 1 ACs <span class="bcp14">MUST NOT</span> be
+used.<a href="#section-1.4-2.3.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.4-2.4">
+            <p id="section-1.4-2.4.1">The use of the MD2 digest algorithm for certificate signatures is
+discouraged, and security language was added.<a href="#section-1.4-2.4.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.4-2.5">
+            <p id="section-1.4-2.5.1">Clarified email address use in certificates.  Certificates that do
+not contain an email address have no requirements for verifying
+the email address associated with the certificate.<a href="#section-1.4-2.5.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.4-2.6">
+            <p id="section-1.4-2.6.1">Receiving agents <span class="bcp14">SHOULD</span> display certificate information when
+displaying the results of signature verification.<a href="#section-1.4-2.6.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.4-2.7">
+            <p id="section-1.4-2.7.1">Receiving agents <span class="bcp14">MUST NOT</span> accept a signature made with a
+certificate that does not have at least one of the
+digitalSignature or nonRepudiation bits set.<a href="#section-1.4-2.7.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.4-2.8">
+            <p id="section-1.4-2.8.1">Added clarifications for the interpretation of the key usage and
+extended key usage extensions.<a href="#section-1.4-2.8.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+</section>
+</div>
+<div id="changes-from-smime-v31-to-smime-v32">
+<section id="section-1.5">
+        <h3 id="name-changes-from-s-mime-v31-to-">
+<a href="#section-1.5" class="section-number selfRef">1.5. </a><a href="#name-changes-from-s-mime-v31-to-" class="section-name selfRef">Changes from S/MIME v3.1 to S/MIME v3.2</a>
+        </h3>
+<p id="section-1.5-1">This section reflects the changes that were made when S/MIME v3.2 was
+released.  The language of RFC 2119 ("<span class="bcp14">MUST</span>", "<span class="bcp14">SHOULD</span>", etc.) used for
+S/MIME v3.1 may have been superseded in later versions.<a href="#section-1.5-1" class="pilcrow">¶</a></p>
+<p id="section-1.5-2">Note that the section numbers listed here (e.g., "Section 6") are
+from <span>[<a href="#RFC5750" class="cite xref">RFC5750</a>]</span>.<a href="#section-1.5-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-1.5-3.1">
+            <p id="section-1.5-3.1.1">Moved "Conventions Used in This Document" to Section 1.2.  Added
+definitions for <span class="bcp14">SHOULD</span>+, <span class="bcp14">SHOULD</span>-, and <span class="bcp14">MUST</span>-.<a href="#section-1.5-3.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.5-3.2">
+            <p id="section-1.5-3.2.1">Section 1.1: Updated ASN.1 definition and reference.<a href="#section-1.5-3.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.5-3.3">
+            <p id="section-1.5-3.3.1">Section 1.3: Added text about v3.1 RFCs.<a href="#section-1.5-3.3.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.5-3.4">
+            <p id="section-1.5-3.4.1">Section 3: Aligned email address text with RFC 5280.  Updated note
+to indicate that the emailAddress IA5String upper bound is
+255 characters.  Added text about matching email addresses.<a href="#section-1.5-3.4.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.5-3.5">
+            <p id="section-1.5-3.5.1">Section 4.2: Added text to indicate how S/MIME agents locate the
+correct user certificate.<a href="#section-1.5-3.5.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.5-3.6">
+            <p id="section-1.5-3.6.1">Section 4.3: RSA with SHA-256 (PKCS #1 v1.5) added as <span class="bcp14">MUST</span>; DSA
+with SHA-256 added as <span class="bcp14">SHOULD</span>+; RSA with SHA-1, DSA with SHA-1, and
+RSA with MD5 changed to <span class="bcp14">SHOULD</span>-; and RSASSA-PSS with SHA-256 added
+as <span class="bcp14">SHOULD</span>+.  Updated key sizes and changed pointer to PKIX RFCs.<a href="#section-1.5-3.6.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.5-3.7">
+            <p id="section-1.5-3.7.1">Section 4.4.1: Aligned with PKIX on the use of a basicConstraints
+extension in CA certificates.  Clarified which extension is used
+to constrain end entities from using their keys to perform
+issuing-authority operations.<a href="#section-1.5-3.7.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.5-3.8">
+            <p id="section-1.5-3.8.1">Section 5: Updated security considerations.<a href="#section-1.5-3.8.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.5-3.9">
+            <p id="section-1.5-3.9.1">Section 6: Moved references from Appendix A of RFC 3850 to this
+section.  Updated the references.<a href="#section-1.5-3.9.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.5-3.10">
+            <p id="section-1.5-3.10.1">Appendix A: Added Appendix A to move S/MIME v2 Certificate
+Handling to Historic status.<a href="#section-1.5-3.10.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+</section>
+</div>
+<div id="latest-changes">
+<section id="section-1.6">
+        <h3 id="name-changes-since-s-mime-32">
+<a href="#section-1.6" class="section-number selfRef">1.6. </a><a href="#name-changes-since-s-mime-32" class="section-name selfRef">Changes since S/MIME 3.2</a>
+        </h3>
+<p id="section-1.6-1">This section reflects the changes that were made when S/MIME v4.0 was
+released.  The language of RFC 2119 ("<span class="bcp14">MUST</span>", "<span class="bcp14">SHOULD</span>", etc.) used for
+S/MIME v3.2 may have been superseded by S/MIME v4.0 and may be
+superseded by future versions.<a href="#section-1.6-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-1.6-2.1">
+            <p id="section-1.6-2.1.1">Section 3: Support for internationalized email addresses is
+required.<a href="#section-1.6-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.6-2.2">
+            <p id="section-1.6-2.2.1">Section 4.3: Mandated support for the Elliptic Curve Digital
+Signature Algorithm (ECDSA) with P-256 and the Edwards-curve
+Digital Signature Algorithm (EdDSA) with curve25519 <span>[<a href="#RFC8410" class="cite xref">RFC8410</a>]</span>.
+SHA-1 and MD5 algorithms are marked as historical, as they are no
+longer considered secure.  As the Digital Signature Algorithm
+(DSA) has been replaced by elliptic curve versions, support for
+DSA is now considered historical.  Increased lower bounds on RSA
+key sizes.<a href="#section-1.6-2.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.6-2.3">
+            <p id="section-1.6-2.3.1">Appendix A: Added Appendix A for algorithms that are now
+considered to be historical.<a href="#section-1.6-2.3.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+</section>
+</div>
+</section>
+</div>
+<div id="cms-options">
+<section id="section-2">
+      <h2 id="name-cms-options">
+<a href="#section-2" class="section-number selfRef">2. </a><a href="#name-cms-options" class="section-name selfRef">CMS Options</a>
+      </h2>
+<p id="section-2-1">The CMS message format allows for a wide variety of options in
+content and algorithm support.  This section puts forth a number of
+support requirements and recommendations in order to achieve a base
+level of interoperability among all S/MIME implementations.  Most of
+the CMS format for S/MIME messages is defined in <span>[<a href="#RFC8551" class="cite xref">RFC8551</a>]</span>.<a href="#section-2-1" class="pilcrow">¶</a></p>
+<div id="certificate-revocation-lists">
+<section id="section-2.1">
+        <h3 id="name-certificate-revocation-list">
+<a href="#section-2.1" class="section-number selfRef">2.1. </a><a href="#name-certificate-revocation-list" class="section-name selfRef">Certificate Revocation Lists</a>
+        </h3>
+<p id="section-2.1-1">Receiving agents <span class="bcp14">MUST</span> support the CRL format defined in <span>[<a href="#RFC5280" class="cite xref">RFC5280</a>]</span>.
+If sending agents include CRLs in outgoing messages, the CRL format
+defined in <span>[<a href="#RFC5280" class="cite xref">RFC5280</a>]</span> <span class="bcp14">MUST</span> be used.  Receiving agents <span class="bcp14">MUST</span> support
+both v1 and v2 CRLs.<a href="#section-2.1-1" class="pilcrow">¶</a></p>
+<p id="section-2.1-2">All agents <span class="bcp14">MUST</span> be capable of performing revocation checks using CRLs
+as specified in <span>[<a href="#RFC5280" class="cite xref">RFC5280</a>]</span>.  All agents <span class="bcp14">MUST</span> perform revocation status
+checking in accordance with <span>[<a href="#RFC5280" class="cite xref">RFC5280</a>]</span>.  Receiving agents <span class="bcp14">MUST</span>
+recognize CRLs in received S/MIME messages.<a href="#section-2.1-2" class="pilcrow">¶</a></p>
+<p id="section-2.1-3">Agents <span class="bcp14">SHOULD</span> store CRLs received in messages for use in processing
+later messages.<a href="#section-2.1-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="certificate-choices">
+<section id="section-2.2">
+        <h3 id="name-certificate-choices">
+<a href="#section-2.2" class="section-number selfRef">2.2. </a><a href="#name-certificate-choices" class="section-name selfRef">Certificate Choices</a>
+        </h3>
+<p id="section-2.2-1">Receiving agents <span class="bcp14">MUST</span> support v1 X.509 and v3 X.509 certificates as
+profiled in <span>[<a href="#RFC5280" class="cite xref">RFC5280</a>]</span>.  End-entity certificates <span class="bcp14">MAY</span> include an
+Internet mail address, as described in <a href="#dns-email" class="auto internal xref">Section 3</a>.<a href="#section-2.2-1" class="pilcrow">¶</a></p>
+<p id="section-2.2-2">Receiving agents <span class="bcp14">SHOULD</span> support X.509 version 2 ACs.  See <span>[<a href="#RFC5755" class="cite xref">RFC5755</a>]</span>
+for details about the profile for ACs.<a href="#section-2.2-2" class="pilcrow">¶</a></p>
+<div id="historical-note-about-cms-certificates">
+<section id="section-2.2.1">
+          <h4 id="name-historical-note-about-cms-c">
+<a href="#section-2.2.1" class="section-number selfRef">2.2.1. </a><a href="#name-historical-note-about-cms-c" class="section-name selfRef">Historical Note about CMS Certificates</a>
+          </h4>
+<p id="section-2.2.1-1">The CMS message format supports a choice of certificate formats for
+public key content types: PKIX, PKCS #6 extended certificates
+<span>[<a href="#PKCS6" class="cite xref">PKCS6</a>]</span>, and PKIX ACs.<a href="#section-2.2.1-1" class="pilcrow">¶</a></p>
+<p id="section-2.2.1-2">The PKCS #6 format is not in widespread use.  In addition, PKIX
+certificate extensions address much of the same functionality and
+flexibility as was intended in the PKCS #6 certificate extensions.
+Thus, sending and receiving agents <span class="bcp14">MUST NOT</span> use PKCS #6 extended
+certificates.  Receiving agents <span class="bcp14">MUST</span> be able to parse and process a
+message containing PKCS #6 extended certificates, although ignoring
+those certificates is expected behavior.<a href="#section-2.2.1-2" class="pilcrow">¶</a></p>
+<p id="section-2.2.1-3">X.509 version 1 ACs are also not widely implemented and have
+been superseded by version 2 ACs.  Sending agents <span class="bcp14">MUST NOT</span> send
+version 1 ACs.<a href="#section-2.2.1-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="included-certificates">
+<section id="section-2.3">
+        <h3 id="name-included-certificates">
+<a href="#section-2.3" class="section-number selfRef">2.3. </a><a href="#name-included-certificates" class="section-name selfRef">Included Certificates</a>
+        </h3>
+<p id="section-2.3-1">Receiving agents <span class="bcp14">MUST</span> be able to handle an arbitrary number of
+certificates of arbitrary relationship to the message sender and to
+each other in arbitrary order.  In many cases, the certificates
+included in a signed message may represent a chain of certification
+from the sender to a particular root.  There may be, however,
+situations where the certificates in a signed message may be
+unrelated and included for convenience.<a href="#section-2.3-1" class="pilcrow">¶</a></p>
+<p id="section-2.3-2">Sending agents <span class="bcp14">SHOULD</span> include any certificates for the user's public
+key(s) and associated issuer certificates.  This increases the
+likelihood that the intended recipient can establish trust in the
+originator's public key(s).  This is especially important when
+sending a message to recipients that may not have access to the
+sender's public key through any other means or when sending a signed
+message to a new recipient.  The inclusion of certificates in
+outgoing messages can be omitted if S/MIME objects are sent within a
+group of correspondents that have established access to each other's
+certificates by some other means such as a shared directory or manual
+certificate distribution.  Receiving S/MIME agents <span class="bcp14">SHOULD</span> be able to
+handle messages without certificates by using a database or directory
+lookup scheme to find them.<a href="#section-2.3-2" class="pilcrow">¶</a></p>
+<p id="section-2.3-3">A sending agent <span class="bcp14">SHOULD</span> include at least one chain of certificates up
+to, but not including, a CA that it believes that the recipient may
+trust as authoritative.  A receiving agent <span class="bcp14">MUST</span> be able to handle an
+arbitrarily large number of certificates and chains.<a href="#section-2.3-3" class="pilcrow">¶</a></p>
+<p id="section-2.3-4">Agents <span class="bcp14">MAY</span> send CA certificates -- that is, cross-certificates, 
+self-issued certificates, and self-signed certificates.  Note that
+receiving agents <span class="bcp14">SHOULD NOT</span> simply trust any self-signed certificates
+as valid CAs but <span class="bcp14">SHOULD</span> use some other mechanism to determine if this
+is a CA that should be trusted.  Also note that when certificates
+contain DSA public keys the parameters may be located in the root
+certificate.  This would require that the recipient possess both the
+end-entity certificate and the root certificate to perform a
+signature verification, and is a valid example of a case where
+transmitting the root certificate may be required.<a href="#section-2.3-4" class="pilcrow">¶</a></p>
+<p id="section-2.3-5">Receiving agents <span class="bcp14">MUST</span> support chaining based on the distinguished
+name fields.  Other methods of building certificate chains <span class="bcp14">MAY</span> be
+supported.<a href="#section-2.3-5" class="pilcrow">¶</a></p>
+<p id="section-2.3-6">Receiving agents <span class="bcp14">SHOULD</span> support the decoding of X.509 ACs included in
+CMS objects.  All other issues regarding the generation and use of
+X.509 ACs are outside the scope of this specification.  One
+specification that addresses AC use is defined in <span>[<a href="#RFC3114" class="cite xref">RFC3114</a>]</span>.<a href="#section-2.3-6" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="dns-email">
+<section id="section-3">
+      <h2 id="name-using-distinguished-names-f">
+<a href="#section-3" class="section-number selfRef">3. </a><a href="#name-using-distinguished-names-f" class="section-name selfRef">Using Distinguished Names for Internet Mail</a>
+      </h2>
+<p id="section-3-1">End-entity certificates <span class="bcp14">MAY</span> contain an Internet mail address.
+Email addresses restricted to 7-bit ASCII characters use the<br>
+pkcs-9-at-emailAddress object identifier (OID) (see below) and are
+encoded as described in <span><a href="https://rfc-editor.org/rfc/rfc5280#section-4.2.1.6" class="relref">Section 4.2.1.6</a> of [<a href="#RFC5280" class="cite xref">RFC5280</a>]</span>.
+Internationalized email address names use the OID defined in
+<span>[<a href="#RFC8398" class="cite xref">RFC8398</a>]</span> and are encoded as described therein.  The email address
+<span class="bcp14">SHOULD</span> be in the subjectAltName extension and <span class="bcp14">SHOULD NOT</span> be in the
+subject distinguished name.<a href="#section-3-1" class="pilcrow">¶</a></p>
+<p id="section-3-2">Receiving agents <span class="bcp14">MUST</span> recognize and accept certificates that contain
+no email address.  Agents are allowed to provide an alternative
+mechanism for associating an email address with a certificate that
+does not contain an email address, such as through the use of the
+agent's address book, if available.  Receiving agents <span class="bcp14">MUST</span> recognize
+both ASCII and internationalized email addresses in the
+subjectAltName extension.  Receiving agents <span class="bcp14">MUST</span> recognize email
+addresses in the distinguished name field in the PKCS #9 <span>[<a href="#RFC2985" class="cite xref">RFC2985</a>]</span>
+emailAddress attribute:<a href="#section-3-2" class="pilcrow">¶</a></p>
+<p id="section-3-3">pkcs-9-at-emailAddress OBJECT IDENTIFIER ::=<br>
+{ iso(1) member-body(2) us(840) rsadsi(113549) pkcs(1) pkcs-9(9) 1 }<a href="#section-3-3" class="pilcrow">¶</a></p>
+<p id="section-3-4">Note that this attribute <span class="bcp14">MUST</span> be encoded as IA5String and has an
+upper bound of 255 characters.  The comparing of email addresses is
+fraught with peril.  <span>[<a href="#RFC8398" class="cite xref">RFC8398</a>]</span> defines the procedure for doing the
+comparison of internationalized email addresses.  For ASCII email
+addresses, the domain component (right-hand side of the '@') <span class="bcp14">MUST</span> be
+compared using a case-insensitive function.  The local name
+component (left-hand side of the '@') <span class="bcp14">SHOULD</span> be compared using a<br>
+case-insensitive function.  Some localities may perform other
+transformations on the local name component before doing the
+comparison; however, an S/MIME client cannot know what specific
+localities do.<a href="#section-3-4" class="pilcrow">¶</a></p>
+<p id="section-3-5">Sending agents <span class="bcp14">SHOULD</span> make the address in the From or Sender header
+in a mail message match an Internet mail address in the signer's
+certificate.  Receiving agents <span class="bcp14">MUST</span> check that the address in the
+From or Sender header of a mail message matches an Internet mail
+address in the signer's certificate, if mail addresses are present in
+the certificate.  A receiving agent <span class="bcp14">SHOULD</span> provide some explicit
+alternate processing of the message if this comparison fails; this
+might be done by displaying or logging a message that shows the
+recipient the mail addresses in the certificate or other certificate
+details.<a href="#section-3-5" class="pilcrow">¶</a></p>
+<p id="section-3-6">A receiving agent <span class="bcp14">SHOULD</span> display a subject name or other certificate
+details when displaying an indication of successful or unsuccessful
+signature verification.<a href="#section-3-6" class="pilcrow">¶</a></p>
+<p id="section-3-7">All subject and issuer names <span class="bcp14">MUST</span> be populated (i.e., not an empty
+SEQUENCE) in S/MIME-compliant X.509 certificates, except that the
+subject distinguished name in a user's (i.e., an end entity's)
+certificate <span class="bcp14">MAY</span> be an empty SEQUENCE, in which case the
+subjectAltName extension will include the subject's identifier and
+<span class="bcp14">MUST</span> be marked as critical.<a href="#section-3-7" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="certificate-processing">
+<section id="section-4">
+      <h2 id="name-certificate-processing">
+<a href="#section-4" class="section-number selfRef">4. </a><a href="#name-certificate-processing" class="section-name selfRef">Certificate Processing</a>
+      </h2>
+<p id="section-4-1">S/MIME agents need to provide some certificate retrieval mechanism in
+order to gain access to certificates for recipients of digital
+envelopes.  There are many ways to implement certificate retrieval
+mechanisms.  <span>[<a href="#X.500" class="cite xref">X.500</a>]</span> directory service is an excellent example of a
+certificate retrieval-only mechanism that is compatible with classic
+X.500 distinguished names.  The IETF has published <span>[<a href="#RFC8162" class="cite xref">RFC8162</a>]</span>, which
+describes an experimental protocol to retrieve certificates from the
+Domain Name System (DNS).  Until such mechanisms are widely used,
+their utility may be limited by the small number of the
+correspondent's certificates that can be retrieved.  At a minimum,
+for initial S/MIME deployment, a user agent could automatically
+generate a message to an intended recipient requesting the
+recipient's certificate in a signed return message.<a href="#section-4-1" class="pilcrow">¶</a></p>
+<p id="section-4-2">Receiving and sending agents <span class="bcp14">SHOULD</span> also provide a mechanism to allow
+a user to "store and protect" certificates for correspondents in such
+a way as to guarantee their later retrieval.  In many environments,
+it may be desirable to link the certificate retrieval/storage
+mechanisms together in some sort of certificate database.  In its
+simplest form, a certificate database would be local to a particular
+user and would function in a way similar to an "address book" that
+stores a user's frequent correspondents.  In this way, the
+certificate retrieval mechanism would be limited to the certificates
+that a user has stored (presumably from incoming messages).  A
+comprehensive certificate retrieval/storage solution might combine
+two or more mechanisms to allow the greatest flexibility and utility
+to the user.  For instance, a secure Internet mail agent might resort
+to checking a centralized certificate retrieval mechanism for a
+certificate if it cannot be found in a user's local certificate
+storage/retrieval database.<a href="#section-4-2" class="pilcrow">¶</a></p>
+<p id="section-4-3">Receiving and sending agents <span class="bcp14">SHOULD</span> provide a mechanism for the
+import and export of certificates, using a CMS certs-only message.
+This allows for import and export of full certificate chains as
+opposed to just a single certificate.  This is described in
+<span>[<a href="#RFC8551" class="cite xref">RFC8551</a>]</span>.<a href="#section-4-3" class="pilcrow">¶</a></p>
+<p id="section-4-4">Agents <span class="bcp14">MUST</span> handle multiple valid CA certificates containing the same
+subject name and the same public keys but with overlapping validity
+intervals.<a href="#section-4-4" class="pilcrow">¶</a></p>
+<div id="certificate-revocation-lists-1">
+<section id="section-4.1">
+        <h3 id="name-certificate-revocation-lists">
+<a href="#section-4.1" class="section-number selfRef">4.1. </a><a href="#name-certificate-revocation-lists" class="section-name selfRef">Certificate Revocation Lists</a>
+        </h3>
+<p id="section-4.1-1">In general, it is always better to get the latest CRL information
+from a CA than to get information stored in an incoming message.  A
+receiving agent <span class="bcp14">SHOULD</span> have access to some CRL retrieval mechanism in
+order to gain access to certificate revocation information when
+validating certification paths.  A receiving or sending agent <span class="bcp14">SHOULD</span>
+also provide a mechanism to allow a user to store incoming
+certificate revocation information for correspondents in such a way
+as to guarantee its later retrieval.<a href="#section-4.1-1" class="pilcrow">¶</a></p>
+<p id="section-4.1-2">Receiving and sending agents <span class="bcp14">SHOULD</span> retrieve and utilize CRL
+information every time a certificate is verified as part of a
+certification path validation even if the certificate was already
+verified in the past.  However, in many instances (such as off-line
+verification), access to the latest CRL information may be difficult
+or impossible.  The use of CRL information, therefore, may be
+dictated by the value of the information that is protected.  The
+value of the CRL information in a particular context is beyond the
+scope of this specification but may be governed by the policies
+associated with particular certification paths.<a href="#section-4.1-2" class="pilcrow">¶</a></p>
+<p id="section-4.1-3">All agents <span class="bcp14">MUST</span> be capable of performing revocation checks using CRLs
+as specified in <span>[<a href="#RFC5280" class="cite xref">RFC5280</a>]</span>.  All agents <span class="bcp14">MUST</span> perform revocation status
+checking in accordance with <span>[<a href="#RFC5280" class="cite xref">RFC5280</a>]</span>.  Receiving agents <span class="bcp14">MUST</span>
+recognize CRLs in received S/MIME messages.<a href="#section-4.1-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="certificate-path-validation">
+<section id="section-4.2">
+        <h3 id="name-certificate-path-validation">
+<a href="#section-4.2" class="section-number selfRef">4.2. </a><a href="#name-certificate-path-validation" class="section-name selfRef">Certificate Path Validation</a>
+        </h3>
+<p id="section-4.2-1">In creating a user agent for secure messaging, certificate, CRL, and
+certification path validation should be highly automated while still
+acting in the best interests of the user.  Certificate, CRL, and path
+validation <span class="bcp14">MUST</span> be performed as per <span>[<a href="#RFC5280" class="cite xref">RFC5280</a>]</span> when validating a
+correspondent's public key.  This is necessary before using a public
+key to provide security services such as verifying a signature,
+encrypting a content-encryption key (e.g., RSA), or forming a
+pairwise symmetric key (e.g., Diffie-Hellman) to be used to encrypt
+or decrypt a content-encryption key.<a href="#section-4.2-1" class="pilcrow">¶</a></p>
+<p id="section-4.2-2">Certificates and CRLs are made available to the path validation
+procedure in two ways: a) incoming messages and b) certificate and
+CRL retrieval mechanisms.  Certificates and CRLs in incoming messages
+are not required to be in any particular order, nor are they required
+to be in any way related to the sender or recipient of the message
+(although in most cases they will be related to the sender).
+Incoming certificates and CRLs <span class="bcp14">SHOULD</span> be cached for use in path
+validation and optionally stored for later use.  This temporary
+certificate and CRL cache <span class="bcp14">SHOULD</span> be used to augment any other
+certificate and CRL retrieval mechanisms for path validation on
+incoming signed messages.<a href="#section-4.2-2" class="pilcrow">¶</a></p>
+<p id="section-4.2-3">When verifying a signature and the certificates that are included in
+the message, if a signingCertificate attribute from RFC 2634 [ESS] or
+a signingCertificateV2 attribute from RFC 5035 [ESS] is found in an
+S/MIME message, it <span class="bcp14">SHALL</span> be used to identify the signer's
+certificate.  Otherwise, the certificate is identified in an S/MIME
+message, using either (1) the issuerAndSerialNumber, which identifies
+the signer's certificate by the issuer's distinguished name and the
+certificate serial number or (2) the subjectKeyIdentifier, which
+identifies the signer's certificate by a key identifier.<a href="#section-4.2-3" class="pilcrow">¶</a></p>
+<p id="section-4.2-4">When decrypting an encrypted message, if an
+SMIMEEncryptionKeyPreference attribute is found in an encapsulating
+SignedData, it <span class="bcp14">SHALL</span> be used to identify the originator's certificate
+found in OriginatorInfo.  See <span>[<a href="#RFC5652" class="cite xref">RFC5652</a>]</span> for the CMS fields that
+reference the originator's and recipient's certificates.<a href="#section-4.2-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="certificate-and-crl-signing-algorithms-and-key-sizes">
+<section id="section-4.3">
+        <h3 id="name-certificate-and-crl-signing">
+<a href="#section-4.3" class="section-number selfRef">4.3. </a><a href="#name-certificate-and-crl-signing" class="section-name selfRef">Certificate and CRL Signing Algorithms, and Key Sizes</a>
+        </h3>
+<p id="section-4.3-1">Certificates and CRLs are signed by the certificate issuer.
+Receiving agents:<a href="#section-4.3-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-4.3-2.1">
+            <p id="section-4.3-2.1.1"><span class="bcp14">MUST</span> support ECDSA with curve P-256 with SHA-256.<a href="#section-4.3-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-4.3-2.2">
+            <p id="section-4.3-2.2.1"><span class="bcp14">MUST</span> support EdDSA with curve25519 using PureEdDSA mode.<a href="#section-4.3-2.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-4.3-2.3">
+            <p id="section-4.3-2.3.1"><span class="bcp14">MUST</span>- support RSA PKCS #1 v1.5 with SHA-256.<a href="#section-4.3-2.3.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-4.3-2.4">
+            <p id="section-4.3-2.4.1"><span class="bcp14">SHOULD</span> support the RSA Probabilistic Signature Scheme (RSASSA-PSS)
+with SHA-256.<a href="#section-4.3-2.4.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-4.3-3">Implementations <span class="bcp14">SHOULD</span> use deterministic generation for the parameter
+'k' for ECDSA as outlined in <span>[<a href="#RFC6979" class="cite xref">RFC6979</a>]</span>.  EdDSA is defined to generate
+this parameter deterministically.<a href="#section-4.3-3" class="pilcrow">¶</a></p>
+<p id="section-4.3-4">The following are the RSA and RSASSA-PSS key size requirements for<br>
+S/MIME receiving agents during certificate and CRL signature
+verification:<a href="#section-4.3-4" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-4.3-5">
+<pre>
+        key size &lt;= 2047 : SHOULD NOT (see Appendix A)
+2048 &lt;= key size &lt;= 4096 : MUST (see Security Considerations)
+4096 &lt;  key size         : MAY  (see Security Considerations)
+</pre><a href="#section-4.3-5" class="pilcrow">¶</a>
+</div>
+<p id="section-4.3-6">The signature algorithm OIDs for RSA PKCS #1 v1.5 and RSASSA-PSS with
+SHA-256 using 1024-bit through 3072-bit public keys are specified in
+<span>[<a href="#RFC4055" class="cite xref">RFC4055</a>]</span>, and the signature algorithm definition is found in
+<span>[<a href="#FIPS186-2" class="cite xref">FIPS186-2</a>]</span> with Change Notice 1.<a href="#section-4.3-6" class="pilcrow">¶</a></p>
+<p id="section-4.3-7">The signature algorithm OIDs for RSA PKCS #1 v1.5 and RSASSA-PSS with
+SHA-256 using 4096-bit public keys are specified in <span>[<a href="#RFC4055" class="cite xref">RFC4055</a>]</span>, and
+the signature algorithm definition is found in <span>[<a href="#RFC3447" class="cite xref">RFC3447</a>]</span>.<a href="#section-4.3-7" class="pilcrow">¶</a></p>
+<p id="section-4.3-8">For RSASSA-PSS with SHA-256, see <span>[<a href="#RFC4056" class="cite xref">RFC4056</a>]</span>.<a href="#section-4.3-8" class="pilcrow">¶</a></p>
+<p id="section-4.3-9">For ECDSA, see <span>[<a href="#RFC5758" class="cite xref">RFC5758</a>]</span> and <span>[<a href="#RFC6090" class="cite xref">RFC6090</a>]</span>.  The first reference provides
+the signature algorithm's OID, and the second provides the signature
+algorithm's definition.  Curves other than curve P-256 <span class="bcp14">MAY</span> be used as
+well.<a href="#section-4.3-9" class="pilcrow">¶</a></p>
+<p id="section-4.3-10">For EdDSA, see <span>[<a href="#RFC8032" class="cite xref">RFC8032</a>]</span> and <span>[<a href="#RFC8410" class="cite xref">RFC8410</a>]</span>.  The first reference provides
+the signature algorithm's OID, and the second provides the signature
+algorithm's definition.  Curves other than curve25519 <span class="bcp14">MAY</span> be used as
+well.<a href="#section-4.3-10" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="pkix-certificate-extensions">
+<section id="section-4.4">
+        <h3 id="name-pkix-certificate-extensions">
+<a href="#section-4.4" class="section-number selfRef">4.4. </a><a href="#name-pkix-certificate-extensions" class="section-name selfRef">PKIX Certificate Extensions</a>
+        </h3>
+<p id="section-4.4-1">PKIX describes an extensible framework in which the basic certificate
+information can be extended and describes how such extensions can be
+used to control the process of issuing and validating certificates.
+The LAMPS Working Group has ongoing efforts to identify and create
+extensions that have value in particular certification environments.
+Further, there are active efforts underway to issue PKIX certificates
+for business purposes.  This document identifies the minimum required
+set of certificate extensions that have the greatest value in the<br>
+S/MIME environment.  The syntax and semantics of all the identified
+extensions are defined in <span>[<a href="#RFC5280" class="cite xref">RFC5280</a>]</span>.<a href="#section-4.4-1" class="pilcrow">¶</a></p>
+<p id="section-4.4-2">Sending and receiving agents <span class="bcp14">MUST</span> correctly handle the basic
+constraints, key usage, authority key identifier, subject key
+identifier, and subject alternative name certificate extensions when
+they appear in end-entity and CA certificates.  Some mechanism <span class="bcp14">SHOULD</span>
+exist to gracefully handle other certificate extensions when they
+appear in end-entity or CA certificates.<a href="#section-4.4-2" class="pilcrow">¶</a></p>
+<p id="section-4.4-3">Certificates issued for the S/MIME environment <span class="bcp14">SHOULD NOT</span> contain any
+critical extensions (extensions that have the critical field set to
+TRUE) other than those listed here.  These extensions <span class="bcp14">SHOULD</span> be
+marked as non-critical, unless the proper handling of the extension
+is deemed critical to the correct interpretation of the associated
+certificate.  Other extensions may be included, but those extensions
+<span class="bcp14">SHOULD NOT</span> be marked as critical.<a href="#section-4.4-3" class="pilcrow">¶</a></p>
+<p id="section-4.4-4">Interpretation and syntax for all extensions <span class="bcp14">MUST</span> follow <span>[<a href="#RFC5280" class="cite xref">RFC5280</a>]</span>,
+unless otherwise specified here.<a href="#section-4.4-4" class="pilcrow">¶</a></p>
+<div id="basic-constraints">
+<section id="section-4.4.1">
+          <h4 id="name-basic-constraints">
+<a href="#section-4.4.1" class="section-number selfRef">4.4.1. </a><a href="#name-basic-constraints" class="section-name selfRef">Basic Constraints</a>
+          </h4>
+<p id="section-4.4.1-1">The basicConstraints extension serves to delimit the role and
+position that an issuing-authority or end-entity certificate plays in
+a certification path.<a href="#section-4.4.1-1" class="pilcrow">¶</a></p>
+<p id="section-4.4.1-2">For example, certificates issued to CAs and subordinate CAs contain a
+basicConstraints extension that identifies them as issuing-authority
+certificates.  End-entity certificates contain the key usage
+extension, which restrains end entities from using the key when
+performing issuing-authority operations (see <a href="#ku-ext" class="auto internal xref">Section 4.4.2</a>).<a href="#section-4.4.1-2" class="pilcrow">¶</a></p>
+<p id="section-4.4.1-3">As per <span>[<a href="#RFC5280" class="cite xref">RFC5280</a>]</span>, certificates <span class="bcp14">MUST</span> contain a basicConstraints
+extension in CA certificates and <span class="bcp14">SHOULD NOT</span> contain that extension in
+end-entity certificates.<a href="#section-4.4.1-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="ku-ext">
+<section id="section-4.4.2">
+          <h4 id="name-key-usage-extension">
+<a href="#section-4.4.2" class="section-number selfRef">4.4.2. </a><a href="#name-key-usage-extension" class="section-name selfRef">Key Usage Extension</a>
+          </h4>
+<p id="section-4.4.2-1">The key usage extension serves to limit the technical purposes for
+which a public key listed in a valid certificate may be used.
+Issuing-authority certificates may contain a key usage extension that
+restricts the key to signing certificates, CRLs, and other data.<a href="#section-4.4.2-1" class="pilcrow">¶</a></p>
+<p id="section-4.4.2-2">For example, a CA may create subordinate issuer certificates that
+contain a key usage extension that specifies that the corresponding
+public key can be used to sign end-user certificates and CRLs.<a href="#section-4.4.2-2" class="pilcrow">¶</a></p>
+<p id="section-4.4.2-3">If a key usage extension is included in a PKIX certificate, then it
+<span class="bcp14">MUST</span> be marked as critical.<a href="#section-4.4.2-3" class="pilcrow">¶</a></p>
+<p id="section-4.4.2-4">S/MIME receiving agents <span class="bcp14">MUST NOT</span> accept the signature of a message if
+it was verified using a certificate that contains a key usage
+extension without at least one of the digitalSignature or
+nonRepudiation bits set.  Sometimes S/MIME is used as a secure
+message transport for applications beyond interpersonal messaging; in
+such cases, the S/MIME-enabled application can specify additional
+requirements concerning the digitalSignature or nonRepudiation bits
+within this extension.<a href="#section-4.4.2-4" class="pilcrow">¶</a></p>
+<p id="section-4.4.2-5">If the key usage extension is not specified, receiving clients <span class="bcp14">MUST</span>
+presume that both the digitalSignature and nonRepudiation bits
+are set.<a href="#section-4.4.2-5" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="subject-alternative-name">
+<section id="section-4.4.3">
+          <h4 id="name-subject-alternative-name">
+<a href="#section-4.4.3" class="section-number selfRef">4.4.3. </a><a href="#name-subject-alternative-name" class="section-name selfRef">Subject Alternative Name</a>
+          </h4>
+<p id="section-4.4.3-1">The subject alternative name extension is used in S/MIME as the
+preferred means to convey the email address or addresses that
+correspond to the entity for this certificate.  If the local portion
+of the email address is ASCII, it <span class="bcp14">MUST</span> be encoded using the
+rfc822Name CHOICE of the GeneralName type as described in <span>[<a href="#RFC5280" class="cite xref">RFC5280</a>]</span>,
+Section 4.2.1.6.  If the local portion of the email address is not
+ASCII, it <span class="bcp14">MUST</span> be encoded using the otherName CHOICE of the
+GeneralName type as described in <span>[<a href="#RFC8398" class="cite xref">RFC8398</a>]</span>, Section 3.  Since the
+SubjectAltName type is a SEQUENCE OF GeneralName, multiple email
+addresses <span class="bcp14">MAY</span> be present.<a href="#section-4.4.3-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="extended-key-usage-extension">
+<section id="section-4.4.4">
+          <h4 id="name-extended-key-usage-extensio">
+<a href="#section-4.4.4" class="section-number selfRef">4.4.4. </a><a href="#name-extended-key-usage-extensio" class="section-name selfRef">Extended Key Usage Extension</a>
+          </h4>
+<p id="section-4.4.4-1">The extended key usage extension also serves to limit the technical
+purposes for which a public key listed in a valid certificate may be
+used.  The set of technical purposes for the certificate therefore
+are the intersection of the uses indicated in the key usage and
+extended key usage extensions.<a href="#section-4.4.4-1" class="pilcrow">¶</a></p>
+<p id="section-4.4.4-2">For example, if the certificate contains a key usage extension
+indicating a digital signature and an extended key usage extension
+that includes the id-kp-emailProtection OID, then the certificate may
+be used for signing but not encrypting S/MIME messages.  If the
+certificate contains a key usage extension indicating a digital
+signature but no extended key usage extension, then the certificate
+may also be used to sign but not encrypt S/MIME messages.<a href="#section-4.4.4-2" class="pilcrow">¶</a></p>
+<p id="section-4.4.4-3">If the extended key usage extension is present in the certificate,
+then interpersonal-message S/MIME receiving agents <span class="bcp14">MUST</span> check that it
+contains either the id-kp-emailProtection OID or the
+anyExtendedKeyUsage OID as defined in <span>[<a href="#RFC5280" class="cite xref">RFC5280</a>]</span>.  S/MIME uses other
+than interpersonal messaging <span class="bcp14">MAY</span> require the explicit presence of the
+extended key usage extension, the presence of other OIDs in the
+extension, or both.<a href="#section-4.4.4-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+</section>
+</div>
+<div id="iana-considerations">
+<section id="section-5">
+      <h2 id="name-iana-considerations">
+<a href="#section-5" class="section-number selfRef">5. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
+      </h2>
+<p id="section-5-1">This document has no IANA actions.<a href="#section-5-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="security-considerations">
+<section id="section-6">
+      <h2 id="name-security-considerations">
+<a href="#section-6" class="section-number selfRef">6. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
+      </h2>
+<p id="section-6-1">All of the security issues faced by any cryptographic application
+must be faced by an S/MIME agent.  Among these issues are protecting
+the user's private key, preventing various attacks, and helping the
+user avoid mistakes such as inadvertently encrypting a message for
+the wrong recipient.  The entire list of security considerations is
+beyond the scope of this document, but some significant concerns are
+listed here.<a href="#section-6-1" class="pilcrow">¶</a></p>
+<p id="section-6-2">When processing certificates, there are many situations where the
+processing might fail.  Because the processing may be done by a user
+agent, a security gateway, or some other program, there is no single
+way to handle such failures.  Just because the methods to handle the
+failures have not been listed, however, the reader should not assume
+that they are not important.  The opposite is true: if a certificate
+is not provably valid and associated with the message, the processing
+software should take immediate and noticeable steps to inform the end
+user about it.<a href="#section-6-2" class="pilcrow">¶</a></p>
+<p id="section-6-3">Some of the many places where signature and certificate checking
+might fail include the following:<a href="#section-6-3" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-6-4.1">
+          <p id="section-6-4.1.1">no Internet mail addresses in a certificate match the sender of a
+message, if the certificate contains at least one mail address<a href="#section-6-4.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-6-4.2">
+          <p id="section-6-4.2.1">no certificate chain leads to a trusted CA<a href="#section-6-4.2.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-6-4.3">
+          <p id="section-6-4.3.1">no ability to check the CRL for a certificate is implemented<a href="#section-6-4.3.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-6-4.4">
+          <p id="section-6-4.4.1">an invalid CRL was received<a href="#section-6-4.4.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-6-4.5">
+          <p id="section-6-4.5.1">the CRL being checked is expired<a href="#section-6-4.5.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-6-4.6">
+          <p id="section-6-4.6.1">the certificate is expired<a href="#section-6-4.6.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-6-4.7">
+          <p id="section-6-4.7.1">the certificate has been revoked<a href="#section-6-4.7.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<p id="section-6-5">There are certainly other instances where a certificate may be
+invalid, and it is the responsibility of the processing software to
+check them all thoroughly and decide what to do if the check fails.<a href="#section-6-5" class="pilcrow">¶</a></p>
+<p id="section-6-6">It is possible for there to be multiple unexpired CRLs for a CA.  If
+an agent is consulting CRLs for certificate validation, it <span class="bcp14">SHOULD</span>
+make sure that the most recently issued CRL for that CA is consulted,
+since an S/MIME message sender could deliberately include an older
+unexpired CRL in an S/MIME message.  This older CRL might not include
+recently revoked certificates; this scenario might lead an agent to
+accept a certificate that has been revoked in a subsequent CRL.<a href="#section-6-6" class="pilcrow">¶</a></p>
+<p id="section-6-7">When determining the time for a certificate validity check, agents
+have to be careful to use a reliable time.  In most cases, the time
+used <span class="bcp14">SHOULD</span> be the current time.  Some exceptions to this would be as
+follows:<a href="#section-6-7" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-6-8.1">
+          <p id="section-6-8.1.1">The time the message was received is stored in a secure manner and
+is used at a later time to validate the message.<a href="#section-6-8.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-6-8.2">
+          <p id="section-6-8.2.1">The time in a SigningTime attribute is found in a countersignature
+attribute <span>[<a href="#RFC5652" class="cite xref">RFC5652</a>]</span> that has been successfully validated.<a href="#section-6-8.2.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<p id="section-6-9">The signingTime attribute could be deliberately set to a time where
+the receiving agent would (1) use a CRL that does not contain a
+revocation for the signing certificate or (2) use a certificate that
+has expired or is not yet valid.  This could be done by either
+(1) the sender of the message or (2) an attacker that has compromised
+the key of the sender.<a href="#section-6-9" class="pilcrow">¶</a></p>
+<p id="section-6-10">In addition to the security considerations identified in <span>[<a href="#RFC5280" class="cite xref">RFC5280</a>]</span>,
+caution should be taken when processing certificates that have not
+first been validated to a trust anchor.  Certificates could be
+manufactured by untrusted sources for the purpose of mounting denial-
+of-service attacks or other attacks.  For example, keys selected to
+require excessive cryptographic processing, or extensive lists of CRL
+Distribution Point (CDP) and/or Authority Information Access (AIA)
+addresses in the certificate, could be used to mount denial-of-
+service attacks.  Similarly, attacker-specified CDP and/or AIA
+addresses could be included in fake certificates to allow the
+originator to detect receipt of the message even if signature
+verification fails.<a href="#section-6-10" class="pilcrow">¶</a></p>
+<p id="section-6-11">RSA keys of less than 2048 bits are now considered by many experts to
+be cryptographically insecure (due to advances in computing power)
+and <span class="bcp14">SHOULD</span> no longer be used to sign certificates or CRLs.  Such keys
+were previously considered secure, so processing previously received
+signed and encrypted mail may require processing certificates or CRLs
+signed with weak keys.  Implementations that wish to support previous
+versions of S/MIME or process old messages need to consider the
+security risks that result from accepting certificates and CRLs with
+smaller key sizes (e.g., spoofed certificates) versus the costs of
+denial of service.  If an implementation supports verification of
+certificates or CRLs generated with RSA and DSA keys of less than
+2048 bits, it <span class="bcp14">MUST</span> warn the user.  Implementers should consider
+providing a stronger warning for weak signatures on certificates and
+CRLs associated with newly received messages than the one provided
+for certificates and CRLs associated with previously stored messages.
+Server implementations (e.g., secure mail list servers) where user
+warnings are not appropriate <span class="bcp14">SHOULD</span> reject messages with weak
+cryptography.<a href="#section-6-11" class="pilcrow">¶</a></p>
+<p id="section-6-12">If an implementation is concerned about compliance with National
+Institute of Standards and Technology (NIST) key size
+recommendations, then see <span>[<a href="#SP800-57" class="cite xref">SP800-57</a>]</span>.<a href="#section-6-12" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="sec-combined-references">
+<section id="section-7">
+      <h2 id="name-references">
+<a href="#section-7" class="section-number selfRef">7. </a><a href="#name-references" class="section-name selfRef">References</a>
+      </h2>
+<div id="sec-normative-references">
+<section id="section-7.1">
+        <h3 id="name-normative-references">
+<a href="#section-7.1" class="section-number selfRef">7.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
+        </h3>
+<dl class="references">
+<dt id="FIPS186-2">[FIPS186-2]</dt>
+        <dd>
+<span class="refAuthor">National Institute of Standards and Technology (NIST)</span>, <span class="refTitle">"Digital Signature Standard (DSS) (also with Change Notice 1)"</span>, <span class="seriesInfo">FIPS Federal Information Processing Standard Publication 186-2</span>, <time datetime="2000-01" class="refDate">January 2000</time>, <span>&lt;<a href="https://csrc.nist.gov/publications/detail/fips/186/2/archive/2000-01-27">https://csrc.nist.gov/publications/detail/fips/186/2/archive/2000-01-27</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="FIPS186-3">[FIPS186-3]</dt>
+        <dd>
+<span class="refAuthor">National Institute of Standards and Technology (NIST)</span>, <span class="refTitle">"Digital Signature Standard (DSS)"</span>, <span class="seriesInfo">FIPS Federal Information Processing Standard Publication 186-3</span>, <time datetime="2009-06" class="refDate">June 2009</time>, <span>&lt;<a href="https://csrc.nist.gov/csrc/media/publications/fips/186/3/archive/2009-06-25/documents/fips_186-3.pdf">https://csrc.nist.gov/csrc/media/publications/fips/186/3/archive/2009-06-25/documents/fips_186-3.pdf</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC2119">[RFC2119]</dt>
+        <dd>
+<span class="refAuthor">Bradner, S.</span>, <span class="refTitle">"Key words for use in RFCs to Indicate Requirement Levels"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 2119</span>, <span class="seriesInfo">DOI 10.17487/RFC2119</span>, <time datetime="1997-03" class="refDate">March 1997</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc2119">https://www.rfc-editor.org/rfc/rfc2119</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC2634">[RFC2634]</dt>
+        <dd>
+<span class="refAuthor">Hoffman, P., Ed.</span>, <span class="refTitle">"Enhanced Security Services for S/MIME"</span>, <span class="seriesInfo">RFC 2634</span>, <span class="seriesInfo">DOI 10.17487/RFC2634</span>, <time datetime="1999-06" class="refDate">June 1999</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc2634">https://www.rfc-editor.org/rfc/rfc2634</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC2985">[RFC2985]</dt>
+        <dd>
+<span class="refAuthor">Nystrom, M.</span> and <span class="refAuthor">B. Kaliski</span>, <span class="refTitle">"PKCS #9: Selected Object Classes and Attribute Types Version 2.0"</span>, <span class="seriesInfo">RFC 2985</span>, <span class="seriesInfo">DOI 10.17487/RFC2985</span>, <time datetime="2000-11" class="refDate">November 2000</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc2985">https://www.rfc-editor.org/rfc/rfc2985</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC3279">[RFC3279]</dt>
+        <dd>
+<span class="refAuthor">Bassham, L.</span>, <span class="refAuthor">Polk, W.</span>, and <span class="refAuthor">R. Housley</span>, <span class="refTitle">"Algorithms and Identifiers for the Internet X.509 Public Key Infrastructure Certificate and Certificate Revocation List (CRL) Profile"</span>, <span class="seriesInfo">RFC 3279</span>, <span class="seriesInfo">DOI 10.17487/RFC3279</span>, <time datetime="2002-04" class="refDate">April 2002</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc3279">https://www.rfc-editor.org/rfc/rfc3279</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC3447">[RFC3447]</dt>
+        <dd>
+<span class="refAuthor">Jonsson, J.</span> and <span class="refAuthor">B. Kaliski</span>, <span class="refTitle">"Public-Key Cryptography Standards (PKCS) #1: RSA Cryptography Specifications Version 2.1"</span>, <span class="seriesInfo">RFC 3447</span>, <span class="seriesInfo">DOI 10.17487/RFC3447</span>, <time datetime="2003-02" class="refDate">February 2003</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc3447">https://www.rfc-editor.org/rfc/rfc3447</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC4055">[RFC4055]</dt>
+        <dd>
+<span class="refAuthor">Schaad, J.</span>, <span class="refAuthor">Kaliski, B.</span>, and <span class="refAuthor">R. Housley</span>, <span class="refTitle">"Additional Algorithms and Identifiers for RSA Cryptography for use in the Internet X.509 Public Key Infrastructure Certificate and Certificate Revocation List (CRL) Profile"</span>, <span class="seriesInfo">RFC 4055</span>, <span class="seriesInfo">DOI 10.17487/RFC4055</span>, <time datetime="2005-06" class="refDate">June 2005</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc4055">https://www.rfc-editor.org/rfc/rfc4055</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC4056">[RFC4056]</dt>
+        <dd>
+<span class="refAuthor">Schaad, J.</span>, <span class="refTitle">"Use of the RSASSA-PSS Signature Algorithm in Cryptographic Message Syntax (CMS)"</span>, <span class="seriesInfo">RFC 4056</span>, <span class="seriesInfo">DOI 10.17487/RFC4056</span>, <time datetime="2005-06" class="refDate">June 2005</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc4056">https://www.rfc-editor.org/rfc/rfc4056</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC5035">[RFC5035]</dt>
+        <dd>
+<span class="refAuthor">Schaad, J.</span>, <span class="refTitle">"Enhanced Security Services (ESS) Update: Adding CertID Algorithm Agility"</span>, <span class="seriesInfo">RFC 5035</span>, <span class="seriesInfo">DOI 10.17487/RFC5035</span>, <time datetime="2007-08" class="refDate">August 2007</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc5035">https://www.rfc-editor.org/rfc/rfc5035</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC5280">[RFC5280]</dt>
+        <dd>
+<span class="refAuthor">Cooper, D.</span>, <span class="refAuthor">Santesson, S.</span>, <span class="refAuthor">Farrell, S.</span>, <span class="refAuthor">Boeyen, S.</span>, <span class="refAuthor">Housley, R.</span>, and <span class="refAuthor">W. Polk</span>, <span class="refTitle">"Internet X.509 Public Key Infrastructure Certificate and Certificate Revocation List (CRL) Profile"</span>, <span class="seriesInfo">RFC 5280</span>, <span class="seriesInfo">DOI 10.17487/RFC5280</span>, <time datetime="2008-05" class="refDate">May 2008</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc5280">https://www.rfc-editor.org/rfc/rfc5280</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC5652">[RFC5652]</dt>
+        <dd>
+<span class="refAuthor">Housley, R.</span>, <span class="refTitle">"Cryptographic Message Syntax (CMS)"</span>, <span class="seriesInfo">STD 70</span>, <span class="seriesInfo">RFC 5652</span>, <span class="seriesInfo">DOI 10.17487/RFC5652</span>, <time datetime="2009-09" class="refDate">September 2009</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc5652">https://www.rfc-editor.org/rfc/rfc5652</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC5750">[RFC5750]</dt>
+        <dd>
+<span class="refAuthor">Ramsdell, B.</span> and <span class="refAuthor">S. Turner</span>, <span class="refTitle">"Secure/Multipurpose Internet Mail Extensions (S/MIME) Version 3.2 Certificate Handling"</span>, <span class="seriesInfo">RFC 5750</span>, <span class="seriesInfo">DOI 10.17487/RFC5750</span>, <time datetime="2010-01" class="refDate">January 2010</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc5750">https://www.rfc-editor.org/rfc/rfc5750</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC5755">[RFC5755]</dt>
+        <dd>
+<span class="refAuthor">Farrell, S.</span>, <span class="refAuthor">Housley, R.</span>, and <span class="refAuthor">S. Turner</span>, <span class="refTitle">"An Internet Attribute Certificate Profile for Authorization"</span>, <span class="seriesInfo">RFC 5755</span>, <span class="seriesInfo">DOI 10.17487/RFC5755</span>, <time datetime="2010-01" class="refDate">January 2010</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc5755">https://www.rfc-editor.org/rfc/rfc5755</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC5758">[RFC5758]</dt>
+        <dd>
+<span class="refAuthor">Dang, Q.</span>, <span class="refAuthor">Santesson, S.</span>, <span class="refAuthor">Moriarty, K.</span>, <span class="refAuthor">Brown, D.</span>, and <span class="refAuthor">T. Polk</span>, <span class="refTitle">"Internet X.509 Public Key Infrastructure: Additional Algorithms and Identifiers for DSA and ECDSA"</span>, <span class="seriesInfo">RFC 5758</span>, <span class="seriesInfo">DOI 10.17487/RFC5758</span>, <time datetime="2010-01" class="refDate">January 2010</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc5758">https://www.rfc-editor.org/rfc/rfc5758</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC6979">[RFC6979]</dt>
+        <dd>
+<span class="refAuthor">Pornin, T.</span>, <span class="refTitle">"Deterministic Usage of the Digital Signature Algorithm (DSA) and Elliptic Curve Digital Signature Algorithm (ECDSA)"</span>, <span class="seriesInfo">RFC 6979</span>, <span class="seriesInfo">DOI 10.17487/RFC6979</span>, <time datetime="2013-08" class="refDate">August 2013</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc6979">https://www.rfc-editor.org/rfc/rfc6979</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8174">[RFC8174]</dt>
+        <dd>
+<span class="refAuthor">Leiba, B.</span>, <span class="refTitle">"Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 8174</span>, <span class="seriesInfo">DOI 10.17487/RFC8174</span>, <time datetime="2017-05" class="refDate">May 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8174">https://www.rfc-editor.org/rfc/rfc8174</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8398">[RFC8398]</dt>
+        <dd>
+<span class="refAuthor">Melnikov, A., Ed.</span> and <span class="refAuthor">W. Chuang, Ed.</span>, <span class="refTitle">"Internationalized Email Addresses in X.509 Certificates"</span>, <span class="seriesInfo">RFC 8398</span>, <span class="seriesInfo">DOI 10.17487/RFC8398</span>, <time datetime="2018-05" class="refDate">May 2018</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8398">https://www.rfc-editor.org/rfc/rfc8398</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8551">[RFC8551]</dt>
+        <dd>
+<span class="refAuthor">Schaad, J.</span>, <span class="refAuthor">Ramsdell, B.</span>, and <span class="refAuthor">S. Turner</span>, <span class="refTitle">"Secure/Multipurpose Internet Mail Extensions (S/MIME) Version 4.0 Message Specification"</span>, <span class="seriesInfo">RFC 8551</span>, <span class="seriesInfo">DOI 10.17487/RFC8551</span>, <time datetime="2019-04" class="refDate">April 2019</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8551">https://www.rfc-editor.org/rfc/rfc8551</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="X.680">[X.680]</dt>
+      <dd>
+<span class="refTitle">"Information Technology -- Abstract Syntax Notation One (ASN.1): Specification of basic notation"</span>, <span class="seriesInfo">ITU-T Recommendation X.680</span>, <span class="seriesInfo">ISO/IEC 8824-1:2015</span>, <time datetime="2015-08" class="refDate">August 2015</time>, <span>&lt;<a href="https://www.itu.int/rec/T-REC-X.680">https://www.itu.int/rec/T-REC-X.680</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+</div>
+<div id="sec-informative-references">
+<section id="section-7.2">
+        <h3 id="name-informative-references">
+<a href="#section-7.2" class="section-number selfRef">7.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
+        </h3>
+<dl class="references">
+<dt id="PKCS6">[PKCS6]</dt>
+        <dd>
+<span class="refAuthor">RSA Laboratories</span>, <span class="refTitle">"PKCS #6: Extended-Certificate Syntax Standard"</span>, <time datetime="1993-11" class="refDate">November 1993</time>. </dd>
+<dd class="break"></dd>
+<dt id="RFC2311">[RFC2311]</dt>
+        <dd>
+<span class="refAuthor">Dusse, S.</span>, <span class="refAuthor">Hoffman, P.</span>, <span class="refAuthor">Ramsdell, B.</span>, <span class="refAuthor">Lundblade, L.</span>, and <span class="refAuthor">L. Repka</span>, <span class="refTitle">"S/MIME Version 2 Message Specification"</span>, <span class="seriesInfo">RFC 2311</span>, <span class="seriesInfo">DOI 10.17487/RFC2311</span>, <time datetime="1998-03" class="refDate">March 1998</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc2311">https://www.rfc-editor.org/rfc/rfc2311</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC2312">[RFC2312]</dt>
+        <dd>
+<span class="refAuthor">Dusse, S.</span>, <span class="refAuthor">Hoffman, P.</span>, <span class="refAuthor">Ramsdell, B.</span>, and <span class="refAuthor">J. Weinstein</span>, <span class="refTitle">"S/MIME Version 2 Certificate Handling"</span>, <span class="seriesInfo">RFC 2312</span>, <span class="seriesInfo">DOI 10.17487/RFC2312</span>, <time datetime="1998-03" class="refDate">March 1998</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc2312">https://www.rfc-editor.org/rfc/rfc2312</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC2313">[RFC2313]</dt>
+        <dd>
+<span class="refAuthor">Kaliski, B.</span>, <span class="refTitle">"PKCS #1: RSA Encryption Version 1.5"</span>, <span class="seriesInfo">RFC 2313</span>, <span class="seriesInfo">DOI 10.17487/RFC2313</span>, <time datetime="1998-03" class="refDate">March 1998</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc2313">https://www.rfc-editor.org/rfc/rfc2313</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC2314">[RFC2314]</dt>
+        <dd>
+<span class="refAuthor">Kaliski, B.</span>, <span class="refTitle">"PKCS #10: Certification Request Syntax Version 1.5"</span>, <span class="seriesInfo">RFC 2314</span>, <span class="seriesInfo">DOI 10.17487/RFC2314</span>, <time datetime="1998-03" class="refDate">March 1998</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc2314">https://www.rfc-editor.org/rfc/rfc2314</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC2315">[RFC2315]</dt>
+        <dd>
+<span class="refAuthor">Kaliski, B.</span>, <span class="refTitle">"PKCS #7: Cryptographic Message Syntax Version 1.5"</span>, <span class="seriesInfo">RFC 2315</span>, <span class="seriesInfo">DOI 10.17487/RFC2315</span>, <time datetime="1998-03" class="refDate">March 1998</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc2315">https://www.rfc-editor.org/rfc/rfc2315</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC2630">[RFC2630]</dt>
+        <dd>
+<span class="refAuthor">Housley, R.</span>, <span class="refTitle">"Cryptographic Message Syntax"</span>, <span class="seriesInfo">RFC 2630</span>, <span class="seriesInfo">DOI 10.17487/RFC2630</span>, <time datetime="1999-06" class="refDate">June 1999</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc2630">https://www.rfc-editor.org/rfc/rfc2630</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC2631">[RFC2631]</dt>
+        <dd>
+<span class="refAuthor">Rescorla, E.</span>, <span class="refTitle">"Diffie-Hellman Key Agreement Method"</span>, <span class="seriesInfo">RFC 2631</span>, <span class="seriesInfo">DOI 10.17487/RFC2631</span>, <time datetime="1999-06" class="refDate">June 1999</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc2631">https://www.rfc-editor.org/rfc/rfc2631</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC2632">[RFC2632]</dt>
+        <dd>
+<span class="refAuthor">Ramsdell, B., Ed.</span>, <span class="refTitle">"S/MIME Version 3 Certificate Handling"</span>, <span class="seriesInfo">RFC 2632</span>, <span class="seriesInfo">DOI 10.17487/RFC2632</span>, <time datetime="1999-06" class="refDate">June 1999</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc2632">https://www.rfc-editor.org/rfc/rfc2632</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC2633">[RFC2633]</dt>
+        <dd>
+<span class="refAuthor">Ramsdell, B., Ed.</span>, <span class="refTitle">"S/MIME Version 3 Message Specification"</span>, <span class="seriesInfo">RFC 2633</span>, <span class="seriesInfo">DOI 10.17487/RFC2633</span>, <time datetime="1999-06" class="refDate">June 1999</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc2633">https://www.rfc-editor.org/rfc/rfc2633</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC3114">[RFC3114]</dt>
+        <dd>
+<span class="refAuthor">Nicolls, W.</span>, <span class="refTitle">"Implementing Company Classification Policy with the S/MIME Security Label"</span>, <span class="seriesInfo">RFC 3114</span>, <span class="seriesInfo">DOI 10.17487/RFC3114</span>, <time datetime="2002-05" class="refDate">May 2002</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc3114">https://www.rfc-editor.org/rfc/rfc3114</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC3850">[RFC3850]</dt>
+        <dd>
+<span class="refAuthor">Ramsdell, B., Ed.</span>, <span class="refTitle">"Secure/Multipurpose Internet Mail Extensions (S/MIME) Version 3.1 Certificate Handling"</span>, <span class="seriesInfo">RFC 3850</span>, <span class="seriesInfo">DOI 10.17487/RFC3850</span>, <time datetime="2004-07" class="refDate">July 2004</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc3850">https://www.rfc-editor.org/rfc/rfc3850</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC3851">[RFC3851]</dt>
+        <dd>
+<span class="refAuthor">Ramsdell, B., Ed.</span>, <span class="refTitle">"Secure/Multipurpose Internet Mail Extensions (S/MIME) Version 3.1 Message Specification"</span>, <span class="seriesInfo">RFC 3851</span>, <span class="seriesInfo">DOI 10.17487/RFC3851</span>, <time datetime="2004-07" class="refDate">July 2004</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc3851">https://www.rfc-editor.org/rfc/rfc3851</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC3852">[RFC3852]</dt>
+        <dd>
+<span class="refAuthor">Housley, R.</span>, <span class="refTitle">"Cryptographic Message Syntax (CMS)"</span>, <span class="seriesInfo">RFC 3852</span>, <span class="seriesInfo">DOI 10.17487/RFC3852</span>, <time datetime="2004-07" class="refDate">July 2004</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc3852">https://www.rfc-editor.org/rfc/rfc3852</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC5751">[RFC5751]</dt>
+        <dd>
+<span class="refAuthor">Ramsdell, B.</span> and <span class="refAuthor">S. Turner</span>, <span class="refTitle">"Secure/Multipurpose Internet Mail Extensions (S/MIME) Version 3.2 Message Specification"</span>, <span class="seriesInfo">RFC 5751</span>, <span class="seriesInfo">DOI 10.17487/RFC5751</span>, <time datetime="2010-01" class="refDate">January 2010</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc5751">https://www.rfc-editor.org/rfc/rfc5751</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC6090">[RFC6090]</dt>
+        <dd>
+<span class="refAuthor">McGrew, D.</span>, <span class="refAuthor">Igoe, K.</span>, and <span class="refAuthor">M. Salter</span>, <span class="refTitle">"Fundamental Elliptic Curve Cryptography Algorithms"</span>, <span class="seriesInfo">RFC 6090</span>, <span class="seriesInfo">DOI 10.17487/RFC6090</span>, <time datetime="2011-02" class="refDate">February 2011</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc6090">https://www.rfc-editor.org/rfc/rfc6090</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC6151">[RFC6151]</dt>
+        <dd>
+<span class="refAuthor">Turner, S.</span> and <span class="refAuthor">L. Chen</span>, <span class="refTitle">"Updated Security Considerations for the MD5 Message-Digest and the HMAC-MD5 Algorithms"</span>, <span class="seriesInfo">RFC 6151</span>, <span class="seriesInfo">DOI 10.17487/RFC6151</span>, <time datetime="2011-03" class="refDate">March 2011</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc6151">https://www.rfc-editor.org/rfc/rfc6151</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC6194">[RFC6194]</dt>
+        <dd>
+<span class="refAuthor">Polk, T.</span>, <span class="refAuthor">Chen, L.</span>, <span class="refAuthor">Turner, S.</span>, and <span class="refAuthor">P. Hoffman</span>, <span class="refTitle">"Security Considerations for the SHA-0 and SHA-1 Message-Digest Algorithms"</span>, <span class="seriesInfo">RFC 6194</span>, <span class="seriesInfo">DOI 10.17487/RFC6194</span>, <time datetime="2011-03" class="refDate">March 2011</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc6194">https://www.rfc-editor.org/rfc/rfc6194</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8032">[RFC8032]</dt>
+        <dd>
+<span class="refAuthor">Josefsson, S.</span> and <span class="refAuthor">I. Liusvaara</span>, <span class="refTitle">"Edwards-Curve Digital Signature Algorithm (EdDSA)"</span>, <span class="seriesInfo">RFC 8032</span>, <span class="seriesInfo">DOI 10.17487/RFC8032</span>, <time datetime="2017-01" class="refDate">January 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8032">https://www.rfc-editor.org/rfc/rfc8032</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8162">[RFC8162]</dt>
+        <dd>
+<span class="refAuthor">Hoffman, P.</span> and <span class="refAuthor">J. Schlyter</span>, <span class="refTitle">"Using Secure DNS to Associate Certificates with Domain Names for S/MIME"</span>, <span class="seriesInfo">RFC 8162</span>, <span class="seriesInfo">DOI 10.17487/RFC8162</span>, <time datetime="2017-05" class="refDate">May 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8162">https://www.rfc-editor.org/rfc/rfc8162</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8410">[RFC8410]</dt>
+        <dd>
+<span class="refAuthor">Josefsson, S.</span> and <span class="refAuthor">J. Schaad</span>, <span class="refTitle">"Algorithm Identifiers for Ed25519, Ed448, X25519, and X448 for Use in the Internet X.509 Public Key Infrastructure"</span>, <span class="seriesInfo">RFC 8410</span>, <span class="seriesInfo">DOI 10.17487/RFC8410</span>, <time datetime="2018-08" class="refDate">August 2018</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8410">https://www.rfc-editor.org/rfc/rfc8410</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8550">[RFC8550]</dt>
+        <dd>
+<span class="refAuthor">Schaad, J.</span>, <span class="refAuthor">Ramsdell, B.</span>, and <span class="refAuthor">S. Turner</span>, <span class="refTitle">"Secure/Multipurpose Internet Mail Extensions (S/MIME) Version 4.0 Certificate Handling"</span>, <span class="seriesInfo">RFC 8550</span>, <span class="seriesInfo">DOI 10.17487/RFC8550</span>, <time datetime="2019-04" class="refDate">April 2019</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8550">https://www.rfc-editor.org/rfc/rfc8550</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="SP800-57">[SP800-57]</dt>
+        <dd>
+<span class="refAuthor">Barker, E.</span>, <span class="refTitle">"Recommendation for Key Management Part 1: General"</span>, <span class="refContent">National Institute of Standards and Technology</span>, <span class="seriesInfo">DOI 10.6028/nist.sp.800-57pt1r4</span>, <time datetime="2016-01" class="refDate">January 2016</time>, <span>&lt;<a href="https://doi.org/10.6028/nist.sp.800-57pt1r4">https://doi.org/10.6028/nist.sp.800-57pt1r4</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="X.500">[X.500]</dt>
+      <dd>
+<span class="refTitle">"Information technology - Open Systems Interconnection - The Directory - Part 1: Overview of concepts, models and services"</span>, <span class="seriesInfo">ITU-T Recommendation X.500</span>, <span class="seriesInfo">ISO/IEC 9594-1:2017</span>, <span>n.d.</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+</div>
+</section>
+</div>
+<div id="historic-considerations">
+<section id="appendix-A">
+      <h2 id="name-historic-considerations">
+<a href="#appendix-A" class="section-number selfRef">Appendix A. </a><a href="#name-historic-considerations" class="section-name selfRef">Historic Considerations</a>
+      </h2>
+<div id="signature-algorithms-and-key-sizes">
+<section id="appendix-A.1">
+        <h3 id="name-signature-algorithms-and-ke">
+<a href="#appendix-A.1" class="section-number selfRef">A.1. </a><a href="#name-signature-algorithms-and-ke" class="section-name selfRef">Signature Algorithms and Key Sizes</a>
+        </h3>
+<p id="appendix-A.1-1">There are a number of problems with validating certificates on
+sufficiently historic messages.  For this reason, it is strongly
+suggested that user agents treat these certificates differently from
+those on current messages.  These problems include the following:<a href="#appendix-A.1-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="appendix-A.1-2.1">
+            <p id="appendix-A.1-2.1.1">CAs are not required to keep certificates on a CRL beyond one
+update after a certificate has expired.  This means that unless
+CRLs are cached as part of the message it is not always possible
+to check to see if a certificate has been revoked.  The same
+problems exist with Online Certificate Status Protocol (OCSP)
+responses, as they may be based on a CRL rather than on the
+certificate database.<a href="#appendix-A.1-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="appendix-A.1-2.2">
+            <p id="appendix-A.1-2.2.1">RSA and DSA keys of less than 2048 bits are now considered by many
+experts to be cryptographically insecure (due to advances in
+computing power).  Such keys were previously considered secure, so
+the processing of historic certificates will often result in the
+use of weak keys.  Implementations that wish to support previous
+versions of S/MIME or process old messages need to consider the
+security risks that result from smaller key sizes (e.g., spoofed
+messages) versus the costs of denial of service.<a href="#appendix-A.1-2.2.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="appendix-A.1-3.1">
+            <p id="appendix-A.1-3.1.1">[SMIMEv3.2] set the lower limit on suggested key sizes for
+  creating and validation at 1024 bits.  [SMIMEv3.1] set the lower
+  limit at 768 bits.  Prior to that, the lower bound on key sizes
+  was 512 bits.<a href="#appendix-A.1-3.1.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<ul class="normal">
+<li class="normal" id="appendix-A.1-4.1">
+            <p id="appendix-A.1-4.1.1">Hash functions used to validate signatures on historic messages
+may no longer be considered to be secure (see below).  While there
+are not currently any known practical pre-image or second<br>
+pre-image attacks against MD5 or SHA-1, the fact that they are no
+longer considered to be collision resistant implies that the
+security level of any signature that is created with these hash
+algorithms should also be considered as suspect.<a href="#appendix-A.1-4.1.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="appendix-A.1-5">The following algorithms have been called out for some level of
+support by previous S/MIME specifications:<a href="#appendix-A.1-5" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="appendix-A.1-6.1">
+            <p id="appendix-A.1-6.1.1">RSA with MD5 was dropped in [SMIMEv4].  MD5 is no longer
+considered to be secure, as it is no longer collision resistant.
+Details can be found in <span>[<a href="#RFC6151" class="cite xref">RFC6151</a>]</span>.<a href="#appendix-A.1-6.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="appendix-A.1-6.2">
+            <p id="appendix-A.1-6.2.1">RSA and DSA with SHA-1 were dropped in [SMIMEv4].  SHA-1 is no
+longer considered to be secure, as it is no longer collision
+resistant.  The IETF statement on SHA-1 can be found in <span>[<a href="#RFC6194" class="cite xref">RFC6194</a>]</span>,
+but it is out of date relative to the most recent advances.<a href="#appendix-A.1-6.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="appendix-A.1-6.3">
+            <p id="appendix-A.1-6.3.1">DSA with SHA-256 support was dropped in [SMIMEv4].  DSA was
+dropped as part of a general movement from finite fields to
+elliptic curves.  Issues related to dealing with non-deterministic
+generation of the parameter 'k' have come up (see <span>[<a href="#RFC6979" class="cite xref">RFC6979</a>]</span>).<a href="#appendix-A.1-6.3.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="appendix-A.1-7">For 512-bit RSA with SHA-1, see <span>[<a href="#RFC3279" class="cite xref">RFC3279</a>]</span> and <span>[<a href="#FIPS186-2" class="cite xref">FIPS186-2</a>]</span> without
+Change Notice 1; for 512-bit RSA with SHA-256, see <span>[<a href="#RFC4055" class="cite xref">RFC4055</a>]</span> and
+<span>[<a href="#FIPS186-2" class="cite xref">FIPS186-2</a>]</span> without Change Notice 1.  The first reference provides
+the signature algorithm's OID, and the second provides the signature
+algorithm's definition.<a href="#appendix-A.1-7" class="pilcrow">¶</a></p>
+<p id="appendix-A.1-8">For 512-bit DSA with SHA-1, see <span>[<a href="#RFC3279" class="cite xref">RFC3279</a>]</span> and <span>[<a href="#FIPS186-2" class="cite xref">FIPS186-2</a>]</span> without
+Change Notice 1; for 512-bit DSA with SHA-256, see <span>[<a href="#RFC5758" class="cite xref">RFC5758</a>]</span> and
+<span>[<a href="#FIPS186-2" class="cite xref">FIPS186-2</a>]</span> without Change Notice 1; for 1024-bit DSA with SHA-1, see
+<span>[<a href="#RFC3279" class="cite xref">RFC3279</a>]</span> and <span>[<a href="#FIPS186-2" class="cite xref">FIPS186-2</a>]</span> with Change Notice 1; and for 1024-bit
+through 3072-bit DSA with SHA-256, see <span>[<a href="#RFC5758" class="cite xref">RFC5758</a>]</span> and <span>[<a href="#FIPS186-3" class="cite xref">FIPS186-3</a>]</span>.
+The first reference provides the signature algorithm's OID, and the
+second provides the signature algorithm's definition.<a href="#appendix-A.1-8" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="moving-smime-v2-certificate-handling-to-historic-status">
+<section id="appendix-B">
+      <h2 id="name-moving-s-mime-v2-certificat">
+<a href="#appendix-B" class="section-number selfRef">Appendix B. </a><a href="#name-moving-s-mime-v2-certificat" class="section-name selfRef">Moving S/MIME v2 Certificate Handling to Historic Status</a>
+      </h2>
+<p id="appendix-B-1">The S/MIME v3 [SMIMEv3], v3.1 [SMIMEv3.1], v3.2 [SMIMEv3.2], and v4.0
+(this document) specifications are backward compatible with the
+S/MIME v2 Certificate Handling Specification [SMIMEv2], with the
+exception of the algorithms (dropped RC2/40 requirement, and added
+DSA and RSASSA-PSS requirements).  Therefore, RFC 2312 [SMIMEv2] was
+moved to Historic status.<a href="#appendix-B-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="acknowledgements">
+<section id="appendix-C">
+      <h2 id="name-acknowledgements">
+<a href="#name-acknowledgements" class="section-name selfRef">Acknowledgements</a>
+      </h2>
+<p id="appendix-C-1">Many thanks go out to the other authors of the S/MIME v2 Certificate
+Handling RFC: Steve Dusse, Paul Hoffman, and Jeff Weinstein.  Without
+v2, there wouldn't be a v3, v3.1, v3.2, or v4.0.<a href="#appendix-C-1" class="pilcrow">¶</a></p>
+<p id="appendix-C-2">A number of the members of the S/MIME Working Group have also worked
+very hard and contributed to this document.  Any list of people is
+doomed to omission, and for that I apologize.  In alphabetical order,
+the following people stand out in my mind because they made direct
+contributions to this document.<a href="#appendix-C-2" class="pilcrow">¶</a></p>
+<p id="appendix-C-3">Bill Flanigan, Trevor Freeman, Elliott Ginsburg, Alfred Hoenes, Paul
+Hoffman, Russ Housley, David P. Kemp, Michael Myers, John Pawling,
+and Denis Pinkas.<a href="#appendix-C-3" class="pilcrow">¶</a></p>
+<p id="appendix-C-4">The version 4 updates to the S/MIME documents was done under
+the auspices of the LAMPS Working Group.<a href="#appendix-C-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="contributors">
+<section id="appendix-D">
+      <h2 id="name-contributors">
+<a href="#name-contributors" class="section-name selfRef">Contributors</a>
+      </h2>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Jim Schaad</span></div>
+<div dir="auto" class="left"><span class="org">August Cellars</span></div>
+</address>
+</section>
+</div>
+<div id="authors-addresses">
+<section id="appendix-E">
+      <h2 id="name-authors-addresses">
+<a href="#name-authors-addresses" class="section-name selfRef">Authors' Addresses</a>
+      </h2>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Blake Ramsdell</span></div>
+<div dir="auto" class="left"><span class="org">Brute Squad Labs</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:blaker@gmail.com" class="email">blaker@gmail.com</a>
+</div>
+</address>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Sean Turner</span></div>
+<div dir="auto" class="left"><span class="org">sn3rd</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:sean@sn3rd.com" class="email">sean@sn3rd.com</a>
+</div>
+</address>
+</section>
+</div>
+<script>const toc = document.getElementById("toc");
+toc.querySelector("h2").addEventListener("click", e => {
+  toc.classList.toggle("active");
+});
+toc.querySelector("nav").addEventListener("click", e => {
+  toc.classList.remove("active");
+});
+</script>
+</body>
+</html>
