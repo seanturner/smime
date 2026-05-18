@@ -11,13 +11,13 @@ date:
 consensus: true
 v: 3
 area: "Security"
-workgroup: "LAMPS"
+workgroup: "Limited Additional Mechanisms for PKIX and SMIME"
 keyword:
 venue:
-  group: "LAMPS"
+  group: "Limited Additional Mechanisms for PKIX and SMIME"
   type: "Working Group"
   mail: "spasm@ietf.org"
-  arch: "mailarchive.ietf.org/arch/browse/spasm/"
+  arch: "https://mailarchive.ietf.org/arch/browse/spasm/"
   github: "seanturner/smime"
   latest: "https://seanturner.github.io/smime/draft-turner-lamps-rfc8551bis.html"
 
