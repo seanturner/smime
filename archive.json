@@ -1,0 +1,87 @@
+{
+  "magic": "E!vIA5L86J2I",
+  "timestamp": "2026-05-19T02:32:52.317013+00:00",
+  "repo": "seanturner/smime",
+  "labels": [
+    {
+      "name": "bug",
+      "description": "Something isn't working",
+      "color": "d73a4a"
+    },
+    {
+      "name": "documentation",
+      "description": "Improvements or additions to documentation",
+      "color": "0075ca"
+    },
+    {
+      "name": "duplicate",
+      "description": "This issue or pull request already exists",
+      "color": "cfd3d7"
+    },
+    {
+      "name": "enhancement",
+      "description": "New feature or request",
+      "color": "a2eeef"
+    },
+    {
+      "name": "good first issue",
+      "description": "Good for newcomers",
+      "color": "7057ff"
+    },
+    {
+      "name": "help wanted",
+      "description": "Extra attention is needed",
+      "color": "008672"
+    },
+    {
+      "name": "invalid",
+      "description": "This doesn't seem right",
+      "color": "e4e669"
+    },
+    {
+      "name": "question",
+      "description": "Further information is requested",
+      "color": "d876e3"
+    },
+    {
+      "name": "wontfix",
+      "description": "This will not be worked on",
+      "color": "ffffff"
+    }
+  ],
+  "issues": [
+    {
+      "number": 1,
+      "id": "I_kwDOSg7Q3M8AAAABCo6W2Q",
+      "title": "S/MIME 4+ Requested Changes",
+      "url": "https://github.com/seanturner/smime/issues/1",
+      "state": "OPEN",
+      "author": "seanturner",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "A list of changes (will use sub-issues to track):\n\n# Technical Changes to Incorporate\n- [ ] Address Falco attack; see #2\n    - [ ] Require signed attributes.\n    - [ ] Also, adopt id-ct-mimeData content type from [-cms-euf-cma-signeddata](https://github.com/lamps-wg/cms-euf-cma-signeddata)?\n\n# Changes to Consider Incorporating\n- [ ] Deprecate EnvelopedData (and AES-CBC)?\n- [ ] Deprecate RSA encryption?\n- [ ] Keep RSA-OAEP?\n- [ ] Add PQ support?\n\n# Editorial\n- [ ] Change Title and Abbreviation to be \"4+\" until we decide on #\n- [ ] Review and update references, e.g., latest ASN.1, FIPS, ...\n- [ ] Incorporate # number throughout",
+      "createdAt": "2026-05-18T19:47:23Z",
+      "updatedAt": "2026-05-18T19:51:30Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 2,
+      "id": "I_kwDOSg7Q3M8AAAABCo7q6Q",
+      "title": "Address Falco Attack",
+      "url": "https://github.com/seanturner/smime/issues/2",
+      "state": "OPEN",
+      "author": "seanturner",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "There are two ways to address the FALCO attack. Which way do we want to go:\n\n1. Simply always require some signed attributes.\n2. Also, adopt id-ct-mimeData content type from [-cms-euf-cma-signeddata](https://github.com/lamps-wg/cms-euf-cma-signeddata).",
+      "createdAt": "2026-05-18T19:50:41Z",
+      "updatedAt": "2026-05-18T19:50:41Z",
+      "closedAt": null,
+      "comments": []
+    }
+  ],
+  "pulls": []
+}
