@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-05-28T02:25:21.741527+00:00",
+  "timestamp": "2026-05-31T02:40:22.286153+00:00",
   "repo": "seanturner/smime",
   "labels": [
     {
@@ -60,9 +60,9 @@
       "authorAssociation": "OWNER",
       "assignees": [],
       "labels": [],
-      "body": "A list of changes (will use sub-issues to track):\n\n# Technical Changes to Incorporate\n- [ ] Address Falco attack; see #2\n    - [ ] Require signed attributes.\n    - [ ] Also, adopt id-ct-mimeData content type from [-cms-euf-cma-signeddata](https://github.com/lamps-wg/cms-euf-cma-signeddata)?\n\n# Changes to Consider Incorporating\n- [ ] Deprecate EnvelopedData (and AES-CBC)?\n- [ ] Deprecate RSA encryption?\n- [ ] Keep RSA-OAEP?\n- [ ] Add PQ support?\n- [ ] Drop '88 ASN.1 Module?\n\n# Editorial\n- [ ] Change Title and Abbreviation to be \"4+\" until we decide on #\n- [ ] Review and update references, e.g., latest ASN.1, FIPS, ...\n- [ ] Incorporate # number throughout",
+      "body": "A list of changes (will use sub-issues to track):\n\n# Technical Changes to Incorporate\n- [ ] Address Falco attack; see #2\n    - [ ] Require signed attributes.\n    - [ ] Also, adopt id-ct-mimeData content type from [-cms-euf-cma-signeddata](https://github.com/lamps-wg/cms-euf-cma-signeddata)?\n\n# Changes to Consider Incorporating\n- [ ] Deprecate EnvelopedData (and AES-CBC)?\n- [ ] Deprecate RSA encryption?\n- [ ] Keep RSA-OAEP?\n- [ ] Add PQ support?\n- [ ] Drop '88 ASN.1 Module?\n\n# Editorial\n- [ ] Pick version\n    - [ ] Change Title and Abbreviation to be \"4+\" until we decide on #\n    - [ ] Incorporate # number throughout\n- [ ] Review and update references, e.g., latest ASN.1, FIPS, ...\n- [ ] Italicize all the field names (now that we're not in the '80s we can use formatting)",
       "createdAt": "2026-05-18T19:47:23Z",
-      "updatedAt": "2026-05-27T14:55:46Z",
+      "updatedAt": "2026-05-29T12:35:54Z",
       "closedAt": null,
       "comments": []
     },
